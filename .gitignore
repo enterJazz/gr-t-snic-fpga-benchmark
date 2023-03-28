@@ -1,3 +1,7 @@
 build/
 .Xil/
 .vscode/
+
+*.swp
+*.log
+_x/
