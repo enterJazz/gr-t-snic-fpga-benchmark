@@ -26,6 +26,8 @@
 
 #define DATA_SIZE 4096
 
+// TODO: add setup for message attestation
+// attest(msg) : return attestation
 int main(int argc, char** argv) {
 
     std::cout << "argc = " << argc << std::endl;
@@ -52,13 +54,14 @@ int main(int argc, char** argv) {
     auto boOut = xrt::bo(device, vector_size_bytes, krnl.group_id(1));
 
     // Map the contents of the buffer object into host memory
+    // NOTE: message contents in here
     auto bo0_map = boIn.map<int*>();
     auto bo1_map = boOut.map<int*>();
     std::fill(bo0_map, bo0_map + DATA_SIZE, 0);
     std::fill(bo1_map, bo1_map + DATA_SIZE, 0);
 
     // Create the test data
-    int bufReference[DATA_SIZE];
+    // int bufReference[DATA_SIZE];
     for (int i = 0; i < DATA_SIZE; ++i) {
         bo0_map[i] = i;
         // bufReference[i] = bo0_map[i] + bo1_map[i]; //Generate check data for validation
