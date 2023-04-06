@@ -18,16 +18,16 @@ HOST_SRC_DIR := $(SRC_DIR)/host
 KERNEL_SRC_DIR := $(SRC_DIR)/kernel
 
 # dependencies
-KERNEL_DEPS := ./kernel-deps
-XILINX_XRT := /opt/xilinx/xrt
+KERNEL_DEPS_DIR := ./kernel-deps
+KERNEL_HMAC_DIR := $(KERNEL_DEPS_DIR)/hmac-sha256
+KERNEL_SHA_DIR := $(KERNEL_DEPS_DIR)/sha256
 
 # Find all the C and C++ files we want to compile
 # Note the single quotes around the * expressions.
 # The shell will incorrectly expand these otherwise,
 # but we want to send the * directly to the find command.
 HOST_SRCS := $(shell find $(HOST_SRC_DIR) -name '*.cpp' -or -name '*.c' -or -name '*.s')
-KERNEL_SRCS := $(shell find $(KERNEL_SRC_DIR) -name '*.cpp')
-# KERNEL_SRCS += $(wildcard $(KERNEL_DEPS)/*/*.c)
+KERNEL_SRCS := $(shell find $(KERNEL_SRC_DIR) $(KERNEL_DEPS_DIR) -name '*.cpp' -or -name '*.c')
 
 
 
@@ -49,7 +49,7 @@ HOST_CPP_FLAGS = -g -std=c++17 -Wall -O0
 HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread
 
 KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
-KERNEL_LD_FLAGS = --kernel $(KERNEL_NAME) --include $(KERNEL_SRC_DIR)
+KERNEL_LD_FLAGS = --kernel $(KERNEL_NAME) -I$(KERNEL_SRC_DIR) -I$(KERNEL_DEPS_DIR) -I$(KERNEL_HMAC_DIR) -I$(KERNEL_SHA_DIR)
 
 # all the source files
 # SRC = $(wildcard src/*.c)
@@ -61,8 +61,13 @@ KERNEL_LD_FLAGS = --kernel $(KERNEL_NAME) --include $(KERNEL_SRC_DIR)
 $(TARGET): all
 
 .PHONY:
-all: init host platform_config kernel link
+all: check-prerequisites init host platform_config kernel link
 # all: $(TARGET)
+
+check-prerequisites:
+ifndef XILINX_XRT
+	$(error `XILINX_XRT` not set; please execute `source setup.sh`)
+endif
 
 .PHONY:
 init:

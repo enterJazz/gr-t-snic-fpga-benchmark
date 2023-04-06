@@ -1,3 +1,5 @@
+#include <hmac-sha256.h>
+
 extern "C" {
 	int counter = 0;
 	void attest(
