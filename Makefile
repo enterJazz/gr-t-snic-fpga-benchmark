@@ -12,6 +12,7 @@ KERNEL_XCLBIN = $(BUILD_DIR)/$(KERNEL_NAME).xclbin
 
 # TARGET DEF
 TARGET = $(KERNEL_XCLBIN)
+KERNEL_DEBUG_TARGET := $(BUILD_DIR)/$(KERNEL_NAME).out
 
 # host, kernel srcs
 HOST_SRC_DIR := $(SRC_DIR)/host
@@ -45,11 +46,11 @@ TARGET_PLATFORM = xilinx_u280_gen3x16_xdma_1_202211_1
 COMPILE_TARGET = sw_emu
 
 # CFLAGS = -Ideps -Wall
-HOST_CPP_FLAGS = -g -std=c++17 -Wall -O0
+CPP_FLAGS = -g -std=c++17 -Wall -O0
 HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread
 
-KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
-KERNEL_LD_FLAGS = --kernel $(KERNEL_NAME) -I$(KERNEL_SRC_DIR) -I$(KERNEL_DEPS_DIR) -I$(KERNEL_HMAC_DIR) -I$(KERNEL_SHA_DIR)
+KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM) --kernel $(KERNEL_NAME)
+KERNEL_LD_FLAGS = -I$(KERNEL_SRC_DIR) -I$(KERNEL_DEPS_DIR) -I$(KERNEL_HMAC_DIR) -I$(KERNEL_SHA_DIR)
 
 # all the source files
 # SRC = $(wildcard src/*.c)
@@ -76,7 +77,7 @@ init:
 
 .PHONY:
 host: $(HOST_SRCS)
-	$(CPP) $(HOST_CPP_FLAGS) $(HOST_SRCS) -o $(HOST_TARGET) $(HOST_LD_FLAGS)
+	$(CPP) $(CPP_FLAGS) $(HOST_SRCS) -o $(HOST_TARGET) $(HOST_LD_FLAGS)
 
 .PHONY:
 platform_config:
@@ -94,6 +95,10 @@ link: $(HOST_TARGET) $(KERNEL_OBJ)
 run:
 	test -e $(HOST_TARGET)
 	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(HOST_TARGET) $(KERNEL_XCLBIN)
+
+.PHONY:
+check_kernel:
+	$(CPP) $(CPP_FLAGS) $(KERNEL_LD_FLAGS) $(KERNEL_SRCS) -o $(KERNEL_DEBUG_TARGET)
 
 .PHONY:
 clean:

@@ -17,6 +17,7 @@
 //#include "cmdlineparser.h"
 #include <iostream>
 #include <cstring>
+#include <stdint.h> // uint8_t
 
 // XRT includes
 #include "xrt/xrt_bo.h"
@@ -24,7 +25,10 @@
 #include "xrt/xrt_device.h"
 #include "xrt/xrt_kernel.h"
 
-#define DATA_SIZE 4096
+// output size of SHA256 hash ; input is message hash
+#define INPUT_MSG_HASH_SIZE 32
+// output size of HMAC-SHA256 ; attestation is HMAC hash
+#define OUTPUT_ATTESTATION_HASH_SIZE 32
 
 // TODO: add setup for message attestation
 // attest(msg) : return attestation
@@ -50,25 +54,23 @@ int main(int argc, char** argv) {
     std::cout << "Load the xclbin " << binaryFile << std::endl;
     auto uuid = device.load_xclbin(binaryFile);
 
-    size_t vector_size_bytes = sizeof(int) * DATA_SIZE;
-
     //auto krnl = xrt::kernel(device, uuid, "attest");
     auto krnl = xrt::kernel(device, uuid, "attest", xrt::kernel::cu_access_mode::exclusive);
 
     std::cout << "Allocate Buffer in Global Memory\n";
-    auto boIn = xrt::bo(device, vector_size_bytes, krnl.group_id(0)); //Match kernel arguments to RTL kernel
-    auto boOut = xrt::bo(device, vector_size_bytes, krnl.group_id(1));
+    auto boIn = xrt::bo(device, INPUT_MSG_HASH_SIZE, krnl.group_id(0)); //Match kernel arguments to RTL kernel
+    auto boOut = xrt::bo(device, OUTPUT_ATTESTATION_HASH_SIZE, krnl.group_id(1));
 
     // Map the contents of the buffer object into host memory
     // NOTE: message contents in here
-    auto bo0_map = boIn.map<int*>();
-    auto bo1_map = boOut.map<int*>();
-    std::fill(bo0_map, bo0_map + DATA_SIZE, 0);
-    std::fill(bo1_map, bo1_map + DATA_SIZE, 0);
+    auto bo0_map = boIn.map<uint8_t*>();
+    auto bo1_map = boOut.map<uint8_t*>();
+    std::fill(bo0_map, bo0_map + INPUT_MSG_HASH_SIZE, 0);
+    std::fill(bo1_map, bo1_map + OUTPUT_ATTESTATION_HASH_SIZE, 0);
 
-    // Create the test data
+    // Create the test data TODO: produce actual message hash here
     // int bufReference[DATA_SIZE];
-    for (int i = 0; i < DATA_SIZE; ++i) {
+    for (int i = 0; i < INPUT_MSG_HASH_SIZE; ++i) {
         bo0_map[i] = i;
         // bufReference[i] = bo0_map[i] + bo1_map[i]; //Generate check data for validation
 	// TODO: create reference hash OR reference `verify()` / switch kernel
@@ -79,7 +81,7 @@ int main(int argc, char** argv) {
     boIn.sync(XCL_BO_SYNC_BO_TO_DEVICE);
 
     std::cout << "Execution of the kernel\n";
-    auto run = krnl(boIn, boOut, DATA_SIZE); //DATA_SIZE=size
+    auto run = krnl(boIn, boOut);
     run.wait();
 
     // Get the output;
