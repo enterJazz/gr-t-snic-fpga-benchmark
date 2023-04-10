@@ -1,16 +1,10 @@
 #include <stdint.h>
 
 extern "C" {
+#include "util.h"
 #include <hmac-sha256.h>
 }
 
-// https://crypto.stackexchange.com/a/34866
-#define KEY_LEN 32
-// input len = message hash len (256 bit -> 32 byte) + counter max size len (log(int) = 4)
-// NOTE: int max len differs per compiler (see https://stackoverflow.com/questions/11438794/is-the-size-of-c-int-2-bytes-or-4-bytes)
-#define INPUT_MSG_HASH_LEN 32
-#define INT_MAX_LEN 4
-#define INPUT_LEN (INPUT_MSG_HASH_LEN + INT_MAX_LEN)
 
 //TODO: construct `data`: append msg to counter ?
 //TODO: use differnt type for counter, as int size is compiler dependent
@@ -28,7 +22,7 @@ extern "C" {
 	// populate input w/ zeros
 	uint8_t in_data[INPUT_LEN] = { 0x0 };
 	// stores counter to bytes conversion
-	uint8_t counter_bytes[INT_MAX_LEN];
+	uint8_t counter_bytes[COUNTER_LEN];
 
 	// prepare hash input
 	// populate input w/ msg_hash
@@ -43,7 +37,7 @@ extern "C" {
 	counter_bytes[2] = (counter >> 8) & 0xFF;
 	counter_bytes[3] = counter & 0xFF;
 
-	for (int i = 0 ; i < INT_MAX_LEN ; i++ ) {
+	for (int i = 0 ; i < COUNTER_LEN ; i++ ) {
 		in_data[INPUT_MSG_HASH_LEN + i] = counter_bytes[i];
 	}
 

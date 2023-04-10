@@ -1,18 +1,23 @@
 # Thanks to Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
-KERNEL_NAME = attest
-
+KERNEL_ATTEST_NAME = attest
+KERNEL_VERIFY_NAME = verify
+HOST_TARGET = $(BUILD_DIR)/host.exe
 
 # base src dir
 BUILD_DIR := ./build
 SRC_DIR := ./src
 
-HOST_TARGET = $(BUILD_DIR)/host.exe
-KERNEL_OBJ = $(BUILD_DIR)/$(KERNEL_NAME).xo
-KERNEL_XCLBIN = $(BUILD_DIR)/$(KERNEL_NAME).xclbin
+
+KERNEL_ATTEST_OBJ = $(BUILD_DIR)/$(KERNEL_ATTEST_NAME).xo
+KERNEL_VERIFY_OBJ = $(BUILD_DIR)/$(KERNEL_VERIFY_NAME).xo
+KERNEL_OBJS := $(KERNEL_ATTEST_OBJ) $(KERNEL_VERIFY_OBJ)
+
+KERNEL_ATTEST_XCLBIN = $(BUILD_DIR)/$(KERNEL_ATTEST_NAME).xclbin
+KERNEL_VERIFY_XCLBIN = $(BUILD_DIR)/$(KERNEL_VERIFY_NAME).xclbin
 
 # TARGET DEF
 TARGET = $(KERNEL_XCLBIN)
-KERNEL_DEBUG_TARGET := $(BUILD_DIR)/$(KERNEL_NAME).out
+KERNEL_DEBUG_TARGET := $(BUILD_DIR)/$(KERNEL_ATTEST_NAME).out
 
 # host, kernel srcs
 HOST_SRC_DIR := $(SRC_DIR)/host
@@ -28,8 +33,10 @@ KERNEL_SHA_DIR := $(KERNEL_DEPS_DIR)/sha256
 # The shell will incorrectly expand these otherwise,
 # but we want to send the * directly to the find command.
 HOST_SRCS := $(shell find $(HOST_SRC_DIR) -name '*.cpp' -or -name '*.c' -or -name '*.s')
-KERNEL_SRCS := $(shell find $(KERNEL_SRC_DIR) $(KERNEL_DEPS_DIR) -name '*.cpp' -or -name '*.c')
-
+KERNEL_DEPS_SRCS := $(shell find $(KERNEL_DEPS_DIR) -name '*.cpp' -or -name '*.c')
+KERNEL_ATTEST_SRCS := $(KERNEL_SRC_DIR)/attest.cpp $(KERNEL_DEPS_SRCS)
+KERNEL_VERIFY_SRCS := $(KERNEL_SRC_DIR)/verify.cpp $(KERNEL_DEPS_SRCS)
+KERNEL_SRCS := $(KERNEL_ATTEST_SRCS) $(KERNEL_VERIFY_SRCS)
 
 
 # tools
@@ -49,7 +56,7 @@ COMPILE_TARGET = sw_emu
 CPP_FLAGS = -g -std=c++17 -Wall -O0
 HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread
 
-KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM) --kernel $(KERNEL_NAME)
+KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
 KERNEL_LD_FLAGS = -I$(KERNEL_SRC_DIR) -I$(KERNEL_DEPS_DIR) -I$(KERNEL_HMAC_DIR) -I$(KERNEL_SHA_DIR)
 
 # all the source files
@@ -84,8 +91,15 @@ platform_config:
 	$(CFGUTIL) --platform $(TARGET_PLATFORM) --od $(BUILD_DIR)
 
 .PHONY:
-kernel: $(KERNEL_SRCS)
-	$(VC) --compile $(KERNEL_VC_FLAGS) $(KERNEL_LD_FLAGS) $(KERNEL_SRCS) -o $(KERNEL_OBJ)
+kernel: kernel-attest kernel-verify
+
+.PHONY:
+kernel-attest: $(KERNEL_ATTEST_SRCS)
+	$(VC)  --kernel $(KERNEL_ATTEST_NAME) --compile $(KERNEL_VC_FLAGS) $(KERNEL_LD_FLAGS) $(KERNEL_ATTEST_SRCS) -o $(KERNEL_ATTEST_OBJ)
+
+.PHONY:
+kernel-verify: $(KERNEL_VERIFY_SRCS)
+	$(VC)  --kernel $(KERNEL_VERIFY_NAME) --compile $(KERNEL_VC_FLAGS) $(KERNEL_LD_FLAGS) $(KERNEL_VERIFY_SRCS) -o $(KERNEL_VERIFY_OBJ)
 
 .PHONY:
 link: $(HOST_TARGET) $(KERNEL_OBJ)
