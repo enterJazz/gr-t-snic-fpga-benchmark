@@ -1,13 +1,16 @@
 #include <stdint.h>
+
+extern "C" {
 #include <hmac-sha256.h>
+}
 
 // https://crypto.stackexchange.com/a/34866
 #define KEY_LEN 32
-// input len = message hash len (256) + counter max size len (log(int) = 4)
+// input len = message hash len (256 bit -> 32 byte) + counter max size len (log(int) = 4)
 // NOTE: int max len differs per compiler (see https://stackoverflow.com/questions/11438794/is-the-size-of-c-int-2-bytes-or-4-bytes)
-#define INPUT_MSG_HASH_LEN 256
-#define INPUT_LEN 260
+#define INPUT_MSG_HASH_LEN 32
 #define INT_MAX_LEN 4
+#define INPUT_LEN (INPUT_MSG_HASH_LEN + INT_MAX_LEN)
 
 //TODO: construct `data`: append msg to counter ?
 //TODO: use differnt type for counter, as int size is compiler dependent
@@ -78,4 +81,23 @@ extern "C" {
 	
 	}
 }
+
+
+#ifdef _DEBUG_KERNEL_BUILD
+#include <stdio.h>
+int
+main() {	
+	uint8_t in_data[INPUT_MSG_HASH_LEN] = { 0xFF };
+	uint8_t out_data[HMAC_SHA256_DIGEST_SIZE] = { 0x00 };
+	attest(
+		in_data,
+		out_data
+	);
+	
+	for (int i = 0; i < HMAC_SHA256_DIGEST_SIZE ; i++) {
+		printf("%x", out_data[i]);
+	}
+	printf("\n");
+}
+#endif
 

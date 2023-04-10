@@ -18,6 +18,7 @@
 #include <iostream>
 #include <cstring>
 #include <stdint.h> // uint8_t
+#include <stdio.h> // printf
 
 // XRT includes
 #include "xrt/xrt_bo.h"
@@ -92,7 +93,10 @@ int main(int argc, char** argv) {
     // if (std::memcmp(bo2_map, bufReference, DATA_SIZE))
     //    throw std::runtime_error("Value read back does not match reference");
 
-    std::cout << bo1_map;
+    for (int i = 0 ; i < OUTPUT_ATTESTATION_HASH_SIZE ; i++) {
+	std::printf("%x", bo1_map[i]);
+    }
+    std::cout << "\n";
 
     std::cout << "TEST PASSED\n";
     return 0;
