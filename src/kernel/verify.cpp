@@ -4,7 +4,7 @@ extern "C" {
 #include <stddef.h> // size_t
 #include "util.h" // compute_msg_hmac
 #include <hmac-sha256.h> // HMAC_SHA256_DIGEST_SIZE
-#include <stdbool.h>
+#include <stdbool.h> // bool
 }
 
 
