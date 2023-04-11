@@ -17,7 +17,8 @@ KERNEL_VERIFY_XCLBIN = $(BUILD_DIR)/$(KERNEL_VERIFY_NAME).xclbin
 
 # TARGET DEF
 TARGET = $(KERNEL_XCLBIN)
-KERNEL_DEBUG_TARGET := $(BUILD_DIR)/$(KERNEL_ATTEST_NAME).out
+KERNEL_ATTEST_DEBUG_TARGET := $(BUILD_DIR)/$(KERNEL_ATTEST_NAME).out
+KERNEL_VERIFY_DEBUG_TARGET := $(BUILD_DIR)/$(KERNEL_VERIFY_NAME).out
 
 # host, kernel srcs
 HOST_SRC_DIR := $(SRC_DIR)/host
@@ -27,13 +28,14 @@ KERNEL_SRC_DIR := $(SRC_DIR)/kernel
 KERNEL_DEPS_DIR := ./kernel-deps
 KERNEL_HMAC_DIR := $(KERNEL_DEPS_DIR)/hmac-sha256
 KERNEL_SHA_DIR := $(KERNEL_DEPS_DIR)/sha256
+KERNEL_COMMON_DIR := $(KERNEL_SRC_DIR)/common
 
 # Find all the C and C++ files we want to compile
 # Note the single quotes around the * expressions.
 # The shell will incorrectly expand these otherwise,
 # but we want to send the * directly to the find command.
 HOST_SRCS := $(shell find $(HOST_SRC_DIR) -name '*.cpp' -or -name '*.c' -or -name '*.s')
-KERNEL_DEPS_SRCS := $(shell find $(KERNEL_DEPS_DIR) -name '*.cpp' -or -name '*.c')
+KERNEL_DEPS_SRCS := $(shell find $(KERNEL_DEPS_DIR) $(KERNEL_COMMON_DIR) -name '*.cpp' -or -name '*.c')
 KERNEL_ATTEST_SRCS := $(KERNEL_SRC_DIR)/attest.cpp $(KERNEL_DEPS_SRCS)
 KERNEL_VERIFY_SRCS := $(KERNEL_SRC_DIR)/verify.cpp $(KERNEL_DEPS_SRCS)
 KERNEL_SRCS := $(KERNEL_ATTEST_SRCS) $(KERNEL_VERIFY_SRCS)
@@ -57,7 +59,7 @@ CPP_FLAGS = -g -std=c++17 -Wall -O0
 HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread
 
 KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
-KERNEL_LD_FLAGS = -I$(KERNEL_SRC_DIR) -I$(KERNEL_DEPS_DIR) -I$(KERNEL_HMAC_DIR) -I$(KERNEL_SHA_DIR)
+KERNEL_LD_FLAGS = -I$(KERNEL_SRC_DIR) -I$(KERNEL_DEPS_DIR) -I$(KERNEL_HMAC_DIR) -I$(KERNEL_SHA_DIR) -I$(KERNEL_COMMON_DIR)
 
 # all the source files
 # SRC = $(wildcard src/*.c)
@@ -103,18 +105,29 @@ kernel-verify: $(KERNEL_VERIFY_SRCS)
 
 .PHONY:
 link: $(HOST_TARGET) $(KERNEL_OBJ)
-	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_OBJ) -o $(KERNEL_XCLBIN)
+	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_ATTEST_OBJ) -o $(KERNEL_ATTEST_XCLBIN)
+	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_VERIFY_OBJ) -o $(KERNEL_VERIFY_XCLBIN)
 
 .PHONY:
 run:
 	test -e $(HOST_TARGET)
-	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(HOST_TARGET) $(KERNEL_XCLBIN)
+	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(HOST_TARGET) $(KERNEL_ATTEST_XCLBIN)
 
 .PHONY:
-check-kernel:
-	$(CPP) $(CPP_FLAGS) $(KERNEL_LD_FLAGS) $(KERNEL_SRCS) -o $(KERNEL_DEBUG_TARGET)
+check-kernel: check-kernel-attest check-kernel-verify
+
+.PHONY:
+check-kernel-attest:
+	$(CPP) $(CPP_FLAGS) $(KERNEL_LD_FLAGS) $(KERNEL_ATTEST_SRCS) -o $(KERNEL_ATTEST_DEBUG_TARGET)
+
+.PHONY:
+check-kernel-verify:
+	$(CPP) $(CPP_FLAGS) $(KERNEL_LD_FLAGS) $(KERNEL_VERIFY_SRCS) -o $(KERNEL_VERIFY_DEBUG_TARGET)
 
 .PHONY:
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -r _x/
+	rm ./v++*.log
+	rm xcd.log
 

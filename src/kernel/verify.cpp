@@ -1,6 +1,7 @@
 #include <stdint.h> // size_t, uint8_t, uint32_t
 
 extern "C" {
+#include <stddef.h> // size_t
 #include "util.h" // compute_msg_hmac
 #include <hmac-sha256.h> // HMAC_SHA256_DIGEST_SIZE
 #include <stdbool.h>
@@ -17,7 +18,7 @@ extern "C" {
 	        )
 	{
 #pragma HLS INTERFACE m_axi port=in_msg_hash bundle=aximm1
-#pragma HLS INTERFACE m_axi port=in_msg bundle=aximm1
+#pragma HLS INTERFACE m_axi port=in_msg_hmac bundle=aximm1
 #pragma HLS INTERFACE m_axi port=out_verify_result bundle=aximm1
 
 	uint8_t own_msg_hmac[HMAC_SHA256_DIGEST_SIZE];
@@ -61,6 +62,7 @@ main() {
 	} else {
 		printf("HMACs DO NOT match\n");
 	}
+
 }
 #endif
 

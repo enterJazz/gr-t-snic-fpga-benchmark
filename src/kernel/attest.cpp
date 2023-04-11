@@ -30,6 +30,7 @@ extern "C" {
 #ifdef _DEBUG_KERNEL_BUILD
 #include <stdio.h> // printf
 #include <hmac-sha256.h> // HMAC_SHA256_DIGEST_SIZE
+#include <stddef.h> // size_t
 int
 main() {	
 	uint8_t in_data[INPUT_MSG_HASH_LEN] = { 0xFF };
@@ -39,7 +40,7 @@ main() {
 		out_data
 	);
 	
-	for (int i = 0; i < HMAC_SHA256_DIGEST_SIZE ; i++) {
+	for (size_t i = 0; i < HMAC_SHA256_DIGEST_SIZE ; i++) {
 		printf("%x", out_data[i]);
 	}
 	printf("\n");

@@ -8,8 +8,8 @@ void
 compute_msg_hmac(
 	uint8_t out[HMAC_SHA256_DIGEST_SIZE],
 	const uint8_t *msg_hash,
-	const uint32_t counter,
-	const uint8_t *key,
+	uint32_t counter,
+	const uint8_t *key
 ) {
 	// populate hmac input w/ zeros
 	uint8_t in_data[INPUT_LEN] = { 0x0 };
@@ -19,7 +19,7 @@ compute_msg_hmac(
 	// prepare hmac input
 	// populate input w/ msg_hash
 	for (int i = 0 ; i < INPUT_MSG_HASH_LEN ; i++ ) {
-		in_data[i] = in_msg_hash[i];
+		in_data[i] = msg_hash[i];
 	}
 
 	// populate input w/ counter (as bytes)
@@ -52,10 +52,10 @@ compute_msg_hmac(
 	// NOTE: out attestation MUST have size HMAC_SHA256_DIGEST_SIZE (32)
 
 	hmac_sha256(
-		out_attestation,
+		out,
 		in_data,
 		INPUT_LEN,
-		myKey,
+		key,
 		KEY_LEN
 	);
 }
