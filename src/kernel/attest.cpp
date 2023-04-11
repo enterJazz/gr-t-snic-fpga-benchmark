@@ -1,5 +1,7 @@
 #include <stdint.h> // uint8_t, uint32_t
 
+//NOTE: if possible, benchmark symmetric vs asymmetric
+
 extern "C" {
 #include "util.h"
 }
@@ -16,6 +18,7 @@ extern "C" {
 #pragma HLS INTERFACE m_axi port=in_msg_hash bundle=aximm1
 #pragma HLS INTERFACE m_axi port=out_attestation bundle=aximm1
 	
+	// NOTE: difference to trinc in counter in paper -> distinguish between counters
 	compute_msg_hmac(
 		out_attestation,
 		in_msg_hash,

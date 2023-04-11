@@ -1,24 +1,9 @@
 /**
-* Copyright (C) 2020 Xilinx, Inc
-*
-* Licensed under the Apache License, Version 2.0 (the "License"). You may
-* not use this file except in compliance with the License. A copy of the
-* License is located at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-* WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-* License for the specific language governing permissions and limitations
-* under the License.
+ * Executes and thereby benchmarks a given FPGA kernel.
+ * Writes results to a .log file
 */
 
-//#include "cmdlineparser.h"
-#include <iostream>
-#include <cstring>
-#include <stdint.h> // uint8_t
-#include <stdio.h> // printf
+#include "benchmark.h"
 
 // XRT includes
 #include "xrt/xrt_bo.h"
@@ -26,20 +11,31 @@
 #include "xrt/xrt_device.h"
 #include "xrt/xrt_kernel.h"
 
+// System includes
+//#include "cmdlineparser.h"
+#include <iostream>
+#include <cstring>
+#include <stdint.h> // uint8_t
+#include <stdio.h> // printf
+#include <filesystem>
+
 // output size of SHA256 hash ; input is message hash
 #define INPUT_MSG_HASH_SIZE 32
 // output size of HMAC-SHA256 ; attestation is HMAC hash
 #define OUTPUT_ATTESTATION_HASH_SIZE 32
 
+namespace benchmark {
+
+
 // TODO: add setup for message attestation
 // attest(msg) : return attestation
-int main(int argc, char** argv) {
+void benchmark(
+	kernel::Kernel target_kernel,
+	std::filesystem::path target_log_file,
+	)
+{
 
-    std::cout << "argc = " << argc << std::endl;
-    for(int i=0; i < argc; i++){
-	std::cout << "argv[" << i << "] = " << argv[i] << std::endl;
-    }
-
+	// TODO: replace w/ mapping kernel to dict
     // Read settings
     std::string binaryFile;
     if (argc < 2) {
@@ -100,4 +96,6 @@ int main(int argc, char** argv) {
 
     std::cout << "TEST PASSED\n";
     return 0;
+}
+
 }
