@@ -1,104 +1,83 @@
-/**
-* Copyright (C) 2020 Xilinx, Inc
-*
-* Licensed under the Apache License, Version 2.0 (the "License"). You may
-* not use this file except in compliance with the License. A copy of the
-* License is located at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-* WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-* License for the specific language governing permissions and limitations
-* under the License.
-*/
+// std
+#include <algorithm>    // find
+#include <cstdlib>      // exit, EXIT_FAILURE
+#include <iostream>        // cout, cerr
+#include <string>       // string
+#include <string_view>  // string_view
+#include <vector>       // vector
 
-// XRT includes
-#include "xrt/xrt_bo.h"
-#include <experimental/xrt_xclbin.h>
-#include "xrt/xrt_device.h"
-#include "xrt/xrt_kernel.h"
+namespace OptParse
+{
+    enum Option
+    {
+        help,
+        kernel,
+        log_file,
+    };
 
-// System includes
-//#include "cmdlineparser.h"
-#include <iostream>
-#include <cstring>
-#include <stdint.h> // uint8_t
-#include <stdio.h> // printf
-
-// output size of SHA256 hash ; input is message hash
-#define INPUT_MSG_HASH_SIZE 32
-// output size of HMAC-SHA256 ; attestation is HMAC hash
-#define OUTPUT_ATTESTATION_HASH_SIZE 32
-
-// TODO: add setup for message attestation
-// attest(msg) : return attestation
-int main(int argc, char** argv) {
-
-    std::cout << "argc = " << argc << std::endl;
-    for(int i=0; i < argc; i++){
-    std::cout << "argv[" << i << "] = " << argv[i] << std::endl;
+    constexpr std::string_view getOption(const Option opt)
+    {
+        switch (opt)
+        {
+            case help:      return "-h";
+            case kernel:    return "-k";
+            case log_file:  return "-f";
+            default:
+                std::cerr << "unknown opt: " << opt << "\n";
+                std::exit(EXIT_FAILURE);
+        }
     }
 
-    // Read settings
-    std::string binaryFile;
-    if (argc < 2) {
-    binaryFile = "./attest.xclbin";
-    } else {
-    binaryFile = argv[1];
+    // https://stackoverflow.com/a/868894
+    class InputParser
+    {
+        public:
+            InputParser (int &argc, char **argv)
+            {
+                for (int i=1; i < argc; ++i)
+                    this->tokens.push_back(std::string(argv[i]));
+            }
+
+            const std::string& getCmdOption(const Option enum_option) const
+            {
+                const std::string &option { getOption(enum_option) };
+                std::vector<std::string>::const_iterator itr;
+                itr =  std::find(this->tokens.begin(), this->tokens.end(), option);
+                if (itr != this->tokens.end() && ++itr != this->tokens.end())
+                {
+                    return *itr;
+                }
+                static const std::string empty_string("");
+                return empty_string;
+            }
+
+            bool cmdOptionExists(const Option enum_option) const
+            {
+                const std::string &option { getOption(enum_option) };
+                return std::find(this->tokens.begin(), this->tokens.end(), option)
+                       != this->tokens.end();
+            }
+
+        private:
+            std::vector <std::string> tokens;
+    };
+}
+
+
+
+
+int main(int argc, char **argv)
+{
+    OptParse::InputParser input(argc, argv);
+    if (input.cmdOptionExists(OptParse::help))
+    {
+        // Do stuff
     }
-
-    int device_index = 0;
-
-    std::cout << "Open the device" << device_index << std::endl;
-    auto device = xrt::device(device_index);
-    std::cout << "Load the xclbin " << binaryFile << std::endl;
-    auto uuid = device.load_xclbin(binaryFile);
-
-    //auto krnl = xrt::kernel(device, uuid, "attest");
-    auto krnl = xrt::kernel(device, uuid, "attest", xrt::kernel::cu_access_mode::exclusive);
-
-    std::cout << "Allocate Buffer in Global Memory\n";
-    auto boIn = xrt::bo(device, INPUT_MSG_HASH_SIZE, krnl.group_id(0)); //Match kernel arguments to RTL kernel
-    auto boOut = xrt::bo(device, OUTPUT_ATTESTATION_HASH_SIZE, krnl.group_id(1));
-
-    // Map the contents of the buffer object into host memory
-    // NOTE: message contents in here
-    auto bo0_map = boIn.map<uint8_t*>();
-    auto bo1_map = boOut.map<uint8_t*>();
-    std::fill(bo0_map, bo0_map + INPUT_MSG_HASH_SIZE, 0);
-    std::fill(bo1_map, bo1_map + OUTPUT_ATTESTATION_HASH_SIZE, 0);
-
-    // Create the test data TODO: produce actual message hash here
-    // int bufReference[DATA_SIZE];
-    for (int i = 0; i < INPUT_MSG_HASH_SIZE; ++i) {
-        bo0_map[i] = i;
-        // bufReference[i] = bo0_map[i] + bo1_map[i]; //Generate check data for validation
-    // TODO: create reference hash OR reference `verify()` / switch kernel
+    const std::string &filename = input.getCmdOption(OptParse::kernel);
+    if (!filename.empty())
+    {
+        // Do interesting things ...
     }
-
-    // Synchronize buffer content with device side
-    std::cout << "synchronize input buffer data to device global memory\n";
-    boIn.sync(XCL_BO_SYNC_BO_TO_DEVICE);
-
-    std::cout << "Execution of the kernel\n";
-    auto run = krnl(boIn, boOut);
-    run.wait();
-
-    // Get the output;
-    std::cout << "Get the output data from the device" << std::endl;
-    boOut.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
-
-    // TODO: Validate results
-    // if (std::memcmp(bo2_map, bufReference, DATA_SIZE))
-    //    throw std::runtime_error("Value read back does not match reference");
-
-    for (int i = 0 ; i < OUTPUT_ATTESTATION_HASH_SIZE ; i++) {
-    std::printf("%x", bo1_map[i]);
-    }
-    std::cout << "\n";
-
-    std::cout << "TEST PASSED\n";
     return 0;
 }
+

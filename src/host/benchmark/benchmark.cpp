@@ -13,35 +13,48 @@
 
 // System includes
 //#include "cmdlineparser.h"
-#include <iostream>
+#include <iostream>     // std::cerr
+#include <cstdlib>      // std::exit, EXIT_FAILURE
 #include <cstring>
-#include <stdint.h> // uint8_t
-#include <stdio.h> // printf
-#include <filesystem> // path
+#include <stdint.h>     // uint8_t
+#include <stdio.h>      // printf
+#include <filesystem>   // std::filesystem::path
+#include <fstream>      // std::ofstream
 
 // output size of SHA256 hash ; input is message hash
 #define INPUT_MSG_HASH_SIZE 32
 // output size of HMAC-SHA256 ; attestation is HMAC hash
 #define OUTPUT_ATTESTATION_HASH_SIZE 32
 
-namespace benchmark {
+namespace benchmark
+{
 
 
 // TODO: add setup for message attestation
 // attest(msg) : return attestation
 void benchmark(
     kernel::Kernel target_kernel,
-    std::filesystem::path target_log_file,
+    std::filesystem::path target_log_file
     )
 {
 
+    std::ofstream ofs { path, std::ofstream::out | std::ofstream::app };
+    if (!outf)
+    {
+        std::cerr << "File: " << target_log_file << "could not be opened!\n";
+        std::exit(EXIT_FAILURE);
+    }
+
+    
     // TODO: replace w/ mapping kernel to dict
     // Read settings
     std::string binaryFile;
-    if (argc < 2) {
-    binaryFile = "./attest.xclbin";
-    } else {
-    binaryFile = argv[1];
+    if (argc < 2)
+    {
+        binaryFile = "./attest.xclbin";
+    } else
+    {
+        binaryFile = argv[1];
     }
 
     int device_index = 0;
@@ -67,7 +80,8 @@ void benchmark(
 
     // Create the test data TODO: produce actual message hash here
     // int bufReference[DATA_SIZE];
-    for (int i = 0; i < INPUT_MSG_HASH_SIZE; ++i) {
+    for (int i = 0; i < INPUT_MSG_HASH_SIZE; ++i)
+    {
         bo0_map[i] = i;
         // bufReference[i] = bo0_map[i] + bo1_map[i]; //Generate check data for validation
     // TODO: create reference hash OR reference `verify()` / switch kernel
@@ -89,12 +103,15 @@ void benchmark(
     // if (std::memcmp(bo2_map, bufReference, DATA_SIZE))
     //    throw std::runtime_error("Value read back does not match reference");
 
-    for (int i = 0 ; i < OUTPUT_ATTESTATION_HASH_SIZE ; i++) {
-    std::printf("%x", bo1_map[i]);
+    for (int i = 0 ; i < OUTPUT_ATTESTATION_HASH_SIZE ; i++)
+    {
+        std::printf("%x", bo1_map[i]);
     }
     std::cout << "\n";
-
     std::cout << "TEST PASSED\n";
+
+    ofs.close;
+
     return 0;
 }
 
