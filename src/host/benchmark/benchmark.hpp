@@ -1,3 +1,6 @@
+#ifndef BENCHMARK_HPP
+#define BENCHMARK_HPP
+
 // user
 #include "kernel.hpp"   // kernel::Kernel
 
@@ -9,6 +12,9 @@ namespace benchmark
     void benchmark_kernel
     (
         kernel::Kernel target_kernel,
-        std::filesystem::path log_file_path
+        std::filesystem::path log_file_path,
+        std::filesystem::path kernel_xlcbin_path
     );
 }
+
+#endif

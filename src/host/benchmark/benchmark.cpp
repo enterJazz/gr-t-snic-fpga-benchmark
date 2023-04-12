@@ -5,6 +5,9 @@
 
 #include "benchmark.hpp"
 
+// user
+#include "kernel.hpp"
+
 // XRT includes
 #include "xrt/xrt_bo.h"
 #include <experimental/xrt_xclbin.h>
@@ -28,13 +31,16 @@
 
 namespace benchmark
 {
+    // FPGA device index ; required to open FPGA
+    const uint8_t device_index = 0;
 
     // TODO: add setup for message attestation
     // attest(msg) : return attestation
     void benchmark_kernel(
         kernel::Kernel target_kernel,
-        std::filesystem::path log_file_path
-        )
+        std::filesystem::path log_file_path,
+        std::filesystem::path kernel_xlcbin_path
+    )
     {
 
         std::ofstream ofs { log_file_path, std::ofstream::out | std::ofstream::app };
@@ -44,30 +50,24 @@ namespace benchmark
             std::exit(EXIT_FAILURE);
         }
 
-        
-        // TODO: replace w/ mapping kernel to dict
-        // Read settings
-        std::string binaryFile;
-        if (argc < 2)
-        {
-            binaryFile = "./attest.xclbin";
-        } else
-        {
-            binaryFile = argv[1];
-        }
-
-        int device_index = 0;
-
-        std::cout << "Open the device" << device_index << std::endl;
+        // access FPGA
         auto device = xrt::device(device_index);
-        std::cout << "Load the xclbin " << binaryFile << std::endl;
-        auto uuid = device.load_xclbin(binaryFile);
+        auto uuid = device.load_xclbin(kernel_xlcbin_path);
 
-        //auto krnl = xrt::kernel(device, uuid, "attest");
-        auto krnl = xrt::kernel(device, uuid, "attest", xrt::kernel::cu_access_mode::exclusive);
+        auto krnl = xrt::kernel
+        (
+            device,
+            uuid,
+            kernel::kernelToString(target_kernel),
+            xrt::kernel::cu_access_mode::exclusive
+        );
 
-        std::cout << "Allocate Buffer in Global Memory\n";
+        // Allocate Buffer in Global Memory
+        // share memory between host and FPGA kernel
+        //
+        // input buffer
         auto boIn = xrt::bo(device, INPUT_MSG_HASH_SIZE, krnl.group_id(0)); //Match kernel arguments to RTL kernel
+        // output buffer
         auto boOut = xrt::bo(device, OUTPUT_ATTESTATION_HASH_SIZE, krnl.group_id(1));
 
         // Map the contents of the buffer object into host memory
@@ -109,9 +109,6 @@ namespace benchmark
         std::cout << "\n";
         std::cout << "TEST PASSED\n";
 
-        ofs.close;
-
-        return 0;
+        ofs.close();
     }
-
 }

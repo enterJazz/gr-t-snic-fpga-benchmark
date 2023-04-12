@@ -13,6 +13,8 @@
 namespace kernel
 {
 
+    // convert kernel enum to string representation
+    // string representation also serves as kernel identifier for execution
     const std::string kernelToString(Kernel kernel)
     {
         switch(kernel)
@@ -50,8 +52,4 @@ namespace kernel
             std::exit(EXIT_FAILURE);
         }
     }
-
-    // given a kernel, returns its build path to the xlcbin
-    // makes assumptions
-    const std::filesystem::path getPathToKernelXlcbin()
 }

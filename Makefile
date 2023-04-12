@@ -1,6 +1,6 @@
 # Thanks to Job Vranish (https://spin.atomicobject.com/2016/08/26/makefile-c-projects/)
-KERNEL_ATTEST_NAME = attest
-KERNEL_VERIFY_NAME = verify
+KERNEL_ATTEST_NAME = SYMMETRIC_ATTEST
+KERNEL_VERIFY_NAME = SYMMETRIC_VERIFY
 HOST_TARGET = $(BUILD_DIR)/host.exe
 
 # base src dir
