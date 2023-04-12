@@ -1,6 +1,8 @@
 #ifndef PARSE_OPTS_HPP
 #define PARSE_OPTS_HPP
 
+// std
+#include <iostream>
 #include <string>       // string
 #include <string_view>  // string_view
 #include <vector>       // vector
@@ -14,8 +16,18 @@ namespace ParseOpts
         log_file,
     };
 
-    constexpr std::string_view getOption(const Option opt);
-
+    constexpr std::string_view getOption(const Option opt)
+    {
+        switch (opt)
+        {
+            case help:      return "-h";
+            case kernel:    return "-k";
+            case log_file:  return "-f";
+            default:
+                std::cerr << "unknown opt: " << opt << "\n";
+                std::exit(EXIT_FAILURE);
+        }
+    }
 
     // https://stackoverflow.com/a/868894
     class InputParser

@@ -11,18 +11,6 @@
 
 namespace ParseOpts
 {
-    constexpr std::string_view getOption(const Option opt)
-    {
-        switch (opt)
-        {
-            case help:      return "-h";
-            case kernel:    return "-k";
-            case log_file:  return "-f";
-            default:
-                std::cerr << "unknown opt: " << opt << "\n";
-                std::exit(EXIT_FAILURE);
-        }
-    }
 
     InputParser::InputParser (int &argc, char **argv)
     {
