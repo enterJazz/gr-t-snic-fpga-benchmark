@@ -17,7 +17,7 @@
 #include <cstring>
 #include <stdint.h> // uint8_t
 #include <stdio.h> // printf
-#include <filesystem>
+#include <filesystem> // path
 
 // output size of SHA256 hash ; input is message hash
 #define INPUT_MSG_HASH_SIZE 32
@@ -35,7 +35,7 @@ void benchmark(
 	)
 {
 
-	// TODO: replace w/ mapping kernel to dict
+    // TODO: replace w/ mapping kernel to dict
     // Read settings
     std::string binaryFile;
     if (argc < 2) {
