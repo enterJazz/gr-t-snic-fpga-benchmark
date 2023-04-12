@@ -30,18 +30,18 @@ namespace benchmark {
 // TODO: add setup for message attestation
 // attest(msg) : return attestation
 void benchmark(
-	kernel::Kernel target_kernel,
-	std::filesystem::path target_log_file,
-	)
+    kernel::Kernel target_kernel,
+    std::filesystem::path target_log_file,
+    )
 {
 
     // TODO: replace w/ mapping kernel to dict
     // Read settings
     std::string binaryFile;
     if (argc < 2) {
-	binaryFile = "./attest.xclbin";
+    binaryFile = "./attest.xclbin";
     } else {
-	binaryFile = argv[1];
+    binaryFile = argv[1];
     }
 
     int device_index = 0;
@@ -70,7 +70,7 @@ void benchmark(
     for (int i = 0; i < INPUT_MSG_HASH_SIZE; ++i) {
         bo0_map[i] = i;
         // bufReference[i] = bo0_map[i] + bo1_map[i]; //Generate check data for validation
-	// TODO: create reference hash OR reference `verify()` / switch kernel
+    // TODO: create reference hash OR reference `verify()` / switch kernel
     }
 
     // Synchronize buffer content with device side
@@ -90,7 +90,7 @@ void benchmark(
     //    throw std::runtime_error("Value read back does not match reference");
 
     for (int i = 0 ; i < OUTPUT_ATTESTATION_HASH_SIZE ; i++) {
-	std::printf("%x", bo1_map[i]);
+    std::printf("%x", bo1_map[i]);
     }
     std::cout << "\n";
 
