@@ -2,6 +2,9 @@
  * Enumerates the benchmark kernel functions.
  */
 
+// std
+#include <string>   // string
+
 namespace kernel
 {
     enum Kernel
@@ -10,6 +13,9 @@ namespace kernel
         symmetric_verify
     };
 
+    const std::string returnAvailableKernels();
+
+    const Kernel stringToKernel(const std::string kernel_str);
 }
 
 
