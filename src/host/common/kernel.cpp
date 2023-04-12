@@ -1,8 +1,9 @@
 #include "kernel.hpp"
 
 // std
-#include <iostream>     // cerr
 #include <cstdlib>      // exit, EXIT_FAILURE
+#include <filesystem>   // filesystem::path
+#include <iostream>     // cerr
 #include <string>       // string
 
 // macros
@@ -49,4 +50,8 @@ namespace kernel
             std::exit(EXIT_FAILURE);
         }
     }
+
+    // given a kernel, returns its build path to the xlcbin
+    // makes assumptions
+    const std::filesystem::path getPathToKernelXlcbin()
 }

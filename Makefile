@@ -22,9 +22,12 @@ KERNEL_VERIFY_DEBUG_TARGET := $(BUILD_DIR)/$(KERNEL_VERIFY_NAME).out
 
 # host, kernel srcs
 HOST_SRC_DIR := $(SRC_DIR)/host
+HOST_SRC_COMMON_DIR := $(HOST_SRC_DIR)/common
+HOST_SRC_BENCHMARK_DIR := $(HOST_SRC_DIR)/benchmark
+
 KERNEL_SRC_DIR := $(SRC_DIR)/kernel
 
-# dependencies
+# external dependencies
 KERNEL_DEPS_DIR := ./kernel-deps
 KERNEL_HMAC_DIR := $(KERNEL_DEPS_DIR)/hmac-sha256
 KERNEL_SHA_DIR := $(KERNEL_DEPS_DIR)/sha256
@@ -56,7 +59,7 @@ COMPILE_TARGET = sw_emu
 
 # CFLAGS = -Ideps -Wall
 CPP_FLAGS = -g -std=c++17 -Wall -O0
-HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread
+HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -I$(HOST_SRC_DIR) -I$(HOST_SRC_COMMON_DIR) -I$(HOST_SRC_BENCHMARK_DIR) -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread
 
 KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
 KERNEL_LD_FLAGS = -I$(KERNEL_SRC_DIR) -I$(KERNEL_DEPS_DIR) -I$(KERNEL_HMAC_DIR) -I$(KERNEL_SHA_DIR) -I$(KERNEL_COMMON_DIR)

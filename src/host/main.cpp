@@ -1,7 +1,12 @@
+/*
+ * Benchmarks specific FPGA kernels.
+ */
+
 // user
 // ParseOpts
 #include "parse_opts.hpp"   // ParseOpts::InputParser, ParseOpts::Options
 #include "kernel.hpp"       // kernel::Kernel, kernel::stringToKernel
+#include "benchmark.hpp"
 
 // std
 #include <cstdlib>          // exit, EXIT_SUCCESS, EXIT_FAILURE
@@ -14,7 +19,9 @@ int main(int argc, char **argv)
 {
     // parse command line args
     const std::string binary_name { argv[0] };
-    [[maybe_unused]] kernel::Kernel benchmark_kernel;
+    // input args for benchmark function ; parsed in this function
+    [[maybe_unused]] kernel::Kernel kernel_enum;
+    [[maybe_unused]] std::filesystem::path log_file_path;
 
     ParseOpts::InputParser input(argc, argv);
     if (input.cmdOptionExists(ParseOpts::help) || argc == 1)
@@ -31,7 +38,7 @@ int main(int argc, char **argv)
     if (!kernel_string.empty())
     {
         // parse into kernel enum
-        benchmark_kernel = kernel::stringToKernel(kernel_string);
+        kernel_enum = kernel::stringToKernel(kernel_string);
     }
     else
     {
@@ -40,10 +47,10 @@ int main(int argc, char **argv)
         std::exit(EXIT_FAILURE);
     }
 
-    const std::string &log_file_path_string = input.getCmdOption(ParseOpts::log_file);
+    const std::string log_file_path_string = input.getCmdOption(ParseOpts::log_file);
     if (!log_file_path_string.empty())
     {
-        std::filesystem::path log_file_path{ log_file_path_string };
+        log_file_path = log_file_path_string;
     }
     else
     {
@@ -51,6 +58,12 @@ int main(int argc, char **argv)
             << " [LOG_FILE_PATH] required\n";
         std::exit(EXIT_FAILURE);
     }
+
+    benchmark::benchmark_kernel
+    (
+        kernel_enum,
+        log_file_path   
+    );
 
     return 0;
 }
