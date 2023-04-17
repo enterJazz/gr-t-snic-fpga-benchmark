@@ -1,14 +1,11 @@
-#include <stdint.h> // size_t, uint8_t, uint32_t
 
 extern "C" {
+#include <stdint.h> // uint8_t, uint32_t
 #include <stddef.h> // size_t
 #include "util.h" // compute_msg_hmac
 #include <hmac-sha256.h> // HMAC_SHA256_DIGEST_SIZE
 #include <stdbool.h> // bool
-}
 
-
-extern "C" {
     uint32_t counter = 0;
     uint8_t myKey[KEY_LEN] = { 0x0 };
     void verify(

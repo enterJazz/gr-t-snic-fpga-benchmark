@@ -20,9 +20,9 @@ int main(int argc, char **argv)
     // parse command line args
     const std::string binary_name { argv[0] };
     // input args for benchmark function ; parsed in this function
-    [[maybe_unused]] kernel::Kernel kernel_enum;
-    [[maybe_unused]] std::filesystem::path log_file_path;
-    [[maybe_unused]] std::filesystem::path kernel_xlcbin_path;
+    kernel::Kernel kernel_enum;
+    std::filesystem::path log_file_path;
+    std::filesystem::path kernel_xlcbin_path;
 
     ParseOpts::InputParser input(argc, argv);
     if (input.cmdOptionExists(ParseOpts::help) || argc == 1)
@@ -83,5 +83,5 @@ int main(int argc, char **argv)
         kernel_xlcbin_path
     );
 
-    return 0;
+    std::exit(EXIT_SUCCESS);
 }

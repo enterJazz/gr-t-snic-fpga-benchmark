@@ -1,13 +1,9 @@
-#include <stdint.h> // uint8_t, uint32_t
 
 //NOTE: if possible, benchmark symmetric vs asymmetric
 
 extern "C" {
+#include <stdint.h> // uint8_t, uint32_t
 #include "util.h"
-}
-
-
-extern "C" {
     uint32_t counter = 0;
     uint8_t myKey[KEY_LEN] = { 0x0 };
     void attest(

@@ -7,6 +7,7 @@
 
 // user
 #include "kernel.hpp"
+#include "utils.hpp"    // utils::populate_input_data
 
 // XRT includes
 #include "xrt/xrt_bo.h"
@@ -24,19 +25,23 @@
 #include <filesystem>   // std::filesystem::path
 #include <fstream>      // std::ofstream
 
-// output size of SHA256 hash ; input is message hash
-#define INPUT_MSG_HASH_SIZE 32
-// output size of HMAC-SHA256 ; attestation is HMAC hash
-#define OUTPUT_ATTESTATION_HASH_SIZE 32
 
 namespace benchmark
 {
     // FPGA device index ; required to open FPGA
-    const uint8_t device_index = 0;
+    const uint8_t device_index { 0 };
+    // output size of SHA256 hash ; input is message hash
+    const uint8_t input_msg_hash_size { 32 };
+    // output size of HMAC-SHA256 ; attestation is HMAC hash
+    const uint8_t output_attestation_hash_size { 32 };
 
-    // TODO: add setup for message attestation
+    // IDEA:
+    // identify shared point: in kernel::run
+    // only # of params change
+    //
     // attest(msg) : return attestation
-    void benchmark_kernel(
+    void benchmark_kernel
+    (
         kernel::Kernel target_kernel,
         std::filesystem::path log_file_path,
         std::filesystem::path kernel_xlcbin_path
@@ -62,29 +67,24 @@ namespace benchmark
             xrt::kernel::cu_access_mode::exclusive
         );
 
+        // NOTE: the # of buffers could change between funcs
         // Allocate Buffer in Global Memory
         // share memory between host and FPGA kernel
         //
         // input buffer
-        auto boIn = xrt::bo(device, INPUT_MSG_HASH_SIZE, krnl.group_id(0)); //Match kernel arguments to RTL kernel
+        // Match kernel arguments to RTL kernel
+        auto boIn = xrt::bo(device, input_msg_hash_size, krnl.group_id(0));
         // output buffer
-        auto boOut = xrt::bo(device, OUTPUT_ATTESTATION_HASH_SIZE, krnl.group_id(1));
+        auto boOut = xrt::bo(device, output_attestation_hash_size, krnl.group_id(1));
 
         // Map the contents of the buffer object into host memory
         // NOTE: message contents in here
         auto bo0_map = boIn.map<uint8_t*>();
         auto bo1_map = boOut.map<uint8_t*>();
-        std::fill(bo0_map, bo0_map + INPUT_MSG_HASH_SIZE, 0);
-        std::fill(bo1_map, bo1_map + OUTPUT_ATTESTATION_HASH_SIZE, 0);
+        std::fill(bo0_map, bo0_map + input_msg_hash_size, 0);
+        std::fill(bo1_map, bo1_map + output_attestation_hash_size, 0);
 
-        // Create the test data TODO: produce actual message hash here
-        // int bufReference[DATA_SIZE];
-        for (int i = 0; i < INPUT_MSG_HASH_SIZE; ++i)
-        {
-            bo0_map[i] = i;
-            // bufReference[i] = bo0_map[i] + bo1_map[i]; //Generate check data for validation
-        // TODO: create reference hash OR reference `verify()` / switch kernel
-        }
+        utils::populate_input_data(bo0_map, input_msg_hash_size);
 
         // Synchronize buffer content with device side
         std::cout << "synchronize input buffer data to device global memory\n";
@@ -102,7 +102,7 @@ namespace benchmark
         // if (std::memcmp(bo2_map, bufReference, DATA_SIZE))
         //    throw std::runtime_error("Value read back does not match reference");
 
-        for (int i = 0 ; i < OUTPUT_ATTESTATION_HASH_SIZE ; i++)
+        for (int i = 0 ; i < output_attestation_hash_size ; i++)
         {
             std::printf("%x", bo1_map[i]);
         }
