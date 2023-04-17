@@ -21,7 +21,6 @@ int main(int argc, char **argv)
     const std::string binary_name { argv[0] };
     // input args for benchmark function ; parsed in this function
     kernel::Kernel kernel_enum;
-    std::filesystem::path log_file_path;
     std::filesystem::path kernel_xlcbin_path;
 
     ParseOpts::InputParser input(argc, argv);
@@ -30,8 +29,6 @@ int main(int argc, char **argv)
         std::cout << binary_name << " "
             << ParseOpts::getOption(ParseOpts::kernel) << " "
             << kernel::returnAvailableKernels() << " "
-            << ParseOpts::getOption(ParseOpts::log_file) << " "
-            << " [LOG_FILE_PATH] "
             << ParseOpts::getOption(ParseOpts::kernel_xlcbin) << " "
             << " [KERNEL_XLCBIN_PATH] "
             << "\n";
@@ -51,19 +48,7 @@ int main(int argc, char **argv)
         std::exit(EXIT_FAILURE);
     }
 
-    const std::string log_file_path_string = input.getCmdOption(ParseOpts::log_file);
-    if (!log_file_path_string.empty())
-    {
-        log_file_path = std::filesystem::path{ log_file_path_string };
-    }
-    else
-    {
-        std::cerr << ParseOpts::getOption(ParseOpts::log_file)
-            << " [LOG_FILE_PATH] required\n";
-        std::exit(EXIT_FAILURE);
-    }
-
-    const std::string kernel_xlcbin_path_string = input.getCmdOption(ParseOpts::log_file);
+    const std::string kernel_xlcbin_path_string = input.getCmdOption(ParseOpts::kernel_xlcbin);
     if (!kernel_xlcbin_path_string.empty())
     {
         kernel_xlcbin_path = std::filesystem::path{ kernel_xlcbin_path_string };
@@ -79,7 +64,6 @@ int main(int argc, char **argv)
     benchmark::benchmark_kernel
     (
         kernel_enum,
-        log_file_path,
         kernel_xlcbin_path
     );
 

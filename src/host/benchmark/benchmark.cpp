@@ -23,7 +23,6 @@
 #include <stdint.h>     // uint8_t
 #include <stdio.h>      // printf
 #include <filesystem>   // std::filesystem::path
-#include <fstream>      // std::ofstream
 
 
 namespace benchmark
@@ -43,17 +42,9 @@ namespace benchmark
     void benchmark_kernel
     (
         kernel::Kernel target_kernel,
-        std::filesystem::path log_file_path,
         std::filesystem::path kernel_xlcbin_path
     )
     {
-
-        std::ofstream ofs { log_file_path, std::ofstream::out | std::ofstream::app };
-        if (!ofs)
-        {
-            std::cerr << "File: " << log_file_path << "could not be opened!\n";
-            std::exit(EXIT_FAILURE);
-        }
 
         // access FPGA
         auto device = xrt::device(device_index);
@@ -86,16 +77,14 @@ namespace benchmark
 
         utils::populate_input_data(bo0_map, input_msg_hash_size);
 
-        // Synchronize buffer content with device side
-        std::cout << "synchronize input buffer data to device global memory\n";
+        // synchronize input buffer data to device global memory
         boIn.sync(XCL_BO_SYNC_BO_TO_DEVICE);
 
-        std::cout << "Execution of the kernel\n";
+        // Execution of the kernel
         auto run = krnl(boIn, boOut);
         run.wait();
 
-        // Get the output;
-        std::cout << "Get the output data from the device" << std::endl;
+        // get the output from the device
         boOut.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
 
         // TODO: Validate results
@@ -107,8 +96,5 @@ namespace benchmark
             std::printf("%x", bo1_map[i]);
         }
         std::cout << "\n";
-        std::cout << "TEST PASSED\n";
-
-        ofs.close();
     }
 }
