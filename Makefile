@@ -46,9 +46,10 @@ KERNEL_SRCS := $(KERNEL_ATTEST_SRCS) $(KERNEL_VERIFY_SRCS)
 
 # tools
 ## compilers
-CC = gcc
-CPP = g++
-VC = v++
+CC      = gcc
+CPP     = g++
+VC      = v++
+GDB     = gdb
 ## vits FPGA config
 CFGUTIL = emconfigutil
 
@@ -67,6 +68,10 @@ KERNEL_LD_FLAGS = -I$(KERNEL_SRC_DIR) -I$(KERNEL_DEPS_DIR) -I$(KERNEL_HMAC_DIR) 
 
 # variable args
 NUM_BENCHMARK_ITERATIONS = 10000
+
+## execution
+HOST_EXEC_ARGS := -k $(KERNEL_ATTEST_NAME) -x $(KERNEL_ATTEST_XCLBIN) -n $(NUM_BENCHMARK_ITERATIONS)
+
 
 # all the source files
 # SRC = $(wildcard src/*.c)
@@ -119,11 +124,14 @@ link: $(HOST_TARGET) $(KERNEL_OBJ)
 run:
 	test -e $(HOST_TARGET)
 	# RUN ATTEST
-	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(HOST_TARGET) \
-			   -k $(KERNEL_ATTEST_NAME) \
-			   -x $(KERNEL_ATTEST_XCLBIN) \
-			   -n $(NUM_BENCHMARK_ITERATIONS)
+	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(HOST_TARGET) $(HOST_EXEC_ARGS)
 
+.PHONY:
+debug:
+	test -e $(HOST_TARGET)
+	# DEBUG ATTEST
+	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(GDB) -tui --args $(HOST_TARGET) $(HOST_EXEC_ARGS)
+			   
 .PHONY:
 check-kernel: check-kernel-attest check-kernel-verify
 

@@ -2,11 +2,21 @@
 #define ATTEST_HPP
 
 // XRT includes
-#include <xrt/xrt_kernel.h> // xrt::kernel, xrt::run
+// xrt
+#include <xrt/xrt_device.h> // device
+#include <xrt/xrt_kernel.h> // kernel, run
+
+// std
+#include <stddef.h> // size_t
 
 namespace benchmark::attest
 {
-    void load_kernel_run(xrt::run *out_run, const xrt::kernel in_krnl);
+    void benchmark_attest_kernel(
+        std::chrono::duration<double, std::milli> *result,
+        xrt::device         device,
+        const xrt::kernel   in_krnl,
+        size_t benchmark_execution_iterations
+    );
 }
 
 #endif

@@ -6,7 +6,7 @@
 #include "benchmark.hpp"
 
 // user
-#include "attest.hpp"
+#include "attest.hpp"   // attest::load_kernel_run
 #include "common.hpp"   // input_msg_hash_size, output_attestation_hash_size
 #include "kernel.hpp"
 #include "utils.hpp"    // utils::populate_input_data
@@ -59,54 +59,19 @@ namespace benchmark
             xrt::kernel::cu_access_mode::exclusive
         );
 
-        // NOTE: the # of buffers could change between funcs
-        // Allocate Buffer in Global Memory
-        // share memory between host and FPGA kernel
-        //
-        // input buffer
-        // Match kernel arguments to RTL kernel
-        auto boIn = xrt::bo(device, input_msg_hash_size, krnl.group_id(0));
-        // output buffer
-        auto boOut = xrt::bo(device, output_attestation_hash_size, krnl.group_id(1));
-
-        // Map the contents of the buffer object into host memory
-        // NOTE: message contents in here
-        auto bo0_map = boIn.map<uint8_t*>();
-        auto bo1_map = boOut.map<uint8_t*>();
-        std::fill(bo0_map, bo0_map + input_msg_hash_size, 0);
-        std::fill(bo1_map, bo1_map + output_attestation_hash_size, 0);
-
-        utils::populate_input_data(bo0_map, input_msg_hash_size);
-
-        // synchronize input buffer data to device global memory
-        boIn.sync(XCL_BO_SYNC_BO_TO_DEVICE);
-
-        // Execution of the kernel
-        // delay run to benchmark function
-        // see https://xilinx.github.io/XRT/2022.1/html/xrt_native_apis.html#other-kernel-apis
-        auto run = krnl(boIn, boOut);
 
         std::chrono::duration<double, std::milli> result;
 
-        utils::benchmark_kernel_execution(&result, run, benchmark_execution_iterations);
+        attest::benchmark_attest_kernel(&result, device, krnl, benchmark_execution_iterations);
 
         std::cout << "RESULT: " << result.count() << "\n";
 
         // get the output from the device
-        boOut.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
+        // boOut.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
 
         // TODO: Validate results
         // if (std::memcmp(bo2_map, bufReference, DATA_SIZE))
         //    throw std::runtime_error("Value read back does not match reference");
-
-        
-#ifdef DEBUG_BUILD
-        for (int i = 0 ; i < output_attestation_hash_size ; i++)
-        {
-            std::printf("%x", bo1_map[i]);
-        }
-        std::cout << "\n";
-#endif
 
     }
 }

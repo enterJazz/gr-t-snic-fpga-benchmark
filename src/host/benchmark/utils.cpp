@@ -34,9 +34,6 @@ namespace benchmark::utils
     )
     {
 
-        // bring kernel run into stopped state
-        kernel_run.wait();
-
         // approach: execute kernel `benchmark_execution_iterations` times,
         // sum the execution time for each iteration,
         // divide by number of executions to obtain average execution time
