@@ -6,6 +6,8 @@
 #include "benchmark.hpp"
 
 // user
+#include "attest.hpp"
+#include "common.hpp"   // input_msg_hash_size, output_attestation_hash_size
 #include "kernel.hpp"
 #include "utils.hpp"    // utils::populate_input_data
 
@@ -31,10 +33,6 @@ namespace benchmark
 {
     // FPGA device index ; required to open FPGA
     const uint8_t device_index { 0 };
-    // output size of SHA256 hash ; input is message hash
-    const uint8_t input_msg_hash_size { 32 };
-    // output size of HMAC-SHA256 ; attestation is HMAC hash
-    const uint8_t output_attestation_hash_size { 32 };
 
     // IDEA:
     // identify shared point: in kernel::run
@@ -101,10 +99,14 @@ namespace benchmark
         // if (std::memcmp(bo2_map, bufReference, DATA_SIZE))
         //    throw std::runtime_error("Value read back does not match reference");
 
+        
+#ifdef DEBUG_BUILD
         for (int i = 0 ; i < output_attestation_hash_size ; i++)
         {
             std::printf("%x", bo1_map[i]);
         }
         std::cout << "\n";
+#endif
+
     }
 }

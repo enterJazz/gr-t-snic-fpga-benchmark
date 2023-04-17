@@ -40,7 +40,7 @@ int main(int argc, char **argv)
         std::exit(EXIT_SUCCESS);
     }
 
-    const std::string kernel_string = input.getCmdOption(ParseOpts::kernel);
+    const std::string kernel_string { input.getCmdOption(ParseOpts::kernel) };
     if (!kernel_string.empty())
     {
         // parse into kernel enum
@@ -53,10 +53,10 @@ int main(int argc, char **argv)
         std::exit(EXIT_FAILURE);
     }
 
-    const std::string kernel_xlcbin_path_string = input.getCmdOption(ParseOpts::kernel_xlcbin);
+    const std::string kernel_xlcbin_path_string { input.getCmdOption(ParseOpts::kernel_xlcbin) };
     if (!kernel_xlcbin_path_string.empty())
     {
-        kernel_xlcbin_path = std::filesystem::path{ kernel_xlcbin_path_string };
+        kernel_xlcbin_path = std::filesystem::path { kernel_xlcbin_path_string };
     }
     else
     {
@@ -65,8 +65,8 @@ int main(int argc, char **argv)
         std::exit(EXIT_FAILURE);
     }
 
-    size_t num_iterations = default_num_iterations;
-    const std::string num_iterations_arg = input.getCmdOption(ParseOpts::num_iterations);
+    size_t num_iterations { default_num_iterations };
+    const std::string num_iterations_arg { input.getCmdOption(ParseOpts::num_iterations) };
     if (!num_iterations_arg.empty())
     {
         num_iterations = std::stoul(num_iterations_arg);
