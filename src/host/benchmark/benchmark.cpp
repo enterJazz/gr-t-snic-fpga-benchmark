@@ -10,10 +10,11 @@
 #include "utils.hpp"    // utils::populate_input_data
 
 // XRT includes
-#include "xrt/xrt_bo.h"
+// see https://xilinx.github.io/XRT/2022.1/html/xrt_native_apis.html
+#include <xrt/xrt_bo.h>
 #include <experimental/xrt_xclbin.h>
-#include "xrt/xrt_device.h"
-#include "xrt/xrt_kernel.h"
+#include <xrt/xrt_device.h>
+#include <xrt/xrt_kernel.h>
 
 // System includes
 //#include "cmdlineparser.h"
@@ -81,8 +82,18 @@ namespace benchmark
         boIn.sync(XCL_BO_SYNC_BO_TO_DEVICE);
 
         // Execution of the kernel
+        // delay run to benchmark function
+        // see https://xilinx.github.io/XRT/2022.1/html/xrt_native_apis.html#other-kernel-apis
         auto run = krnl(boIn, boOut);
-        run.wait();
+        // REFACTORME
+        run.set_arg(0, boIn);
+        run.set_arg(1, boOut);
+        // run.wait();
+
+        std::chrono::duration<double, std::milli> result;
+
+        utils::benchmark_kernel_execution(&result, run);
+        std::cout << "RESULT: " << result.count() << "\n";
 
         // get the output from the device
         boOut.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
