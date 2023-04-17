@@ -14,15 +14,17 @@ namespace ParseOpts
         help,
         kernel,
         kernel_xlcbin,
+        num_iterations,
     };
 
     constexpr std::string_view getOption(const Option opt)
     {
         switch (opt)
         {
-            case help:          return "-h";
-            case kernel:        return "-k";
-            case kernel_xlcbin: return "-x";
+            case help:              return "-h";
+            case kernel:            return "-k";
+            case kernel_xlcbin:     return "-x";
+            case num_iterations:    return "-n";
             default:
                 std::cerr << "unknown opt: " << opt << "\n";
                 std::exit(EXIT_FAILURE);

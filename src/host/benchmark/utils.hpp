@@ -15,9 +15,12 @@ namespace benchmark::utils
     // populates given array with random data for input
     void populate_input_data(uint8_t *out, size_t size);
 
-    void benchmark_kernel_execution(
+    void benchmark_kernel_execution
+    (
         std::chrono::duration<double, std::milli> *result,
-        xrt::run kernel_run);
+        xrt::run kernel_run,
+        size_t benchmark_execution_iterations
+    );
 
 }
 

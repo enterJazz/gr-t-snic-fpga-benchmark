@@ -12,8 +12,12 @@
 #include <cstdlib>          // exit, EXIT_SUCCESS, EXIT_FAILURE
 #include <filesystem>       // filesystem::path
 #include <iostream>         // cout, cerr
-#include <string>           // string
+#include <stddef.h>         // size_t
+#include <string>           // string, stoul
 
+
+// default arg value
+const size_t default_num_iterations = 1;
 
 int main(int argc, char **argv)
 {
@@ -22,6 +26,7 @@ int main(int argc, char **argv)
     // input args for benchmark function ; parsed in this function
     kernel::Kernel kernel_enum;
     std::filesystem::path kernel_xlcbin_path;
+
 
     ParseOpts::InputParser input(argc, argv);
     if (input.cmdOptionExists(ParseOpts::help) || argc == 1)
@@ -60,11 +65,18 @@ int main(int argc, char **argv)
         std::exit(EXIT_FAILURE);
     }
 
+    size_t num_iterations = default_num_iterations;
+    const std::string num_iterations_arg = input.getCmdOption(ParseOpts::num_iterations);
+    if (!num_iterations_arg.empty())
+    {
+        num_iterations = std::stoul(num_iterations_arg);
+    }
 
     benchmark::benchmark_kernel
     (
         kernel_enum,
-        kernel_xlcbin_path
+        kernel_xlcbin_path,
+        num_iterations
     );
 
     std::exit(EXIT_SUCCESS);

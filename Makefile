@@ -64,6 +64,10 @@ HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -I$(HOST_SRC_DIR) -I$(HOST_SRC_COMMON_D
 KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
 KERNEL_LD_FLAGS = -I$(KERNEL_SRC_DIR) -I$(KERNEL_DEPS_DIR) -I$(KERNEL_HMAC_DIR) -I$(KERNEL_SHA_DIR) -I$(KERNEL_COMMON_DIR)
 
+
+# variable args
+NUM_BENCHMARK_ITERATIONS = 10000
+
 # all the source files
 # SRC = $(wildcard src/*.c)
 # SRC += $(wildcard deps/*/*.c)
@@ -117,7 +121,8 @@ run:
 	# RUN ATTEST
 	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(HOST_TARGET) \
 			   -k $(KERNEL_ATTEST_NAME) \
-			   -x $(KERNEL_ATTEST_XCLBIN)
+			   -x $(KERNEL_ATTEST_XCLBIN) \
+			   -n $(NUM_BENCHMARK_ITERATIONS)
 
 .PHONY:
 check-kernel: check-kernel-attest check-kernel-verify

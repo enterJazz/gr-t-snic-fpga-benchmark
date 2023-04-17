@@ -12,7 +12,8 @@ namespace benchmark
     void benchmark_kernel
     (
         kernel::Kernel target_kernel,
-        std::filesystem::path kernel_xlcbin_path
+        std::filesystem::path kernel_xlcbin_path,
+        size_t benchmark_execution_iterations
     );
 }
 

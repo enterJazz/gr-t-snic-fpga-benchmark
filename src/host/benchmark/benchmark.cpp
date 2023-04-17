@@ -21,6 +21,7 @@
 #include <iostream>     // std::cerr
 #include <cstdlib>      // std::exit, EXIT_FAILURE
 #include <cstring>
+#include <stddef.h>     // size_t
 #include <stdint.h>     // uint8_t
 #include <stdio.h>      // printf
 #include <filesystem>   // std::filesystem::path
@@ -43,7 +44,8 @@ namespace benchmark
     void benchmark_kernel
     (
         kernel::Kernel target_kernel,
-        std::filesystem::path kernel_xlcbin_path
+        std::filesystem::path kernel_xlcbin_path,
+        size_t benchmark_execution_iterations
     )
     {
 
@@ -85,15 +87,11 @@ namespace benchmark
         // delay run to benchmark function
         // see https://xilinx.github.io/XRT/2022.1/html/xrt_native_apis.html#other-kernel-apis
         auto run = krnl(boIn, boOut);
-        // REFACTORME
-        run.wait();
-        run.set_arg(0, boIn);
-        run.set_arg(1, boOut);
-        // run.wait();
 
         std::chrono::duration<double, std::milli> result;
 
-        utils::benchmark_kernel_execution(&result, run);
+        utils::benchmark_kernel_execution(&result, run, benchmark_execution_iterations);
+
         std::cout << "RESULT: " << result.count() << "\n";
 
         // get the output from the device
