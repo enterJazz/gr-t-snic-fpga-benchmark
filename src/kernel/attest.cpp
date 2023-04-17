@@ -6,7 +6,7 @@ extern "C" {
 #include "util.h"
     uint32_t counter = 0;
     uint8_t myKey[KEY_LEN] = { 0x0 };
-    void attest(
+    void SYMMETRIC_ATTEST(
             uint8_t *in_msg_hash,   // Read-Only Vector
             uint8_t *out_attestation    // Output Result
             )

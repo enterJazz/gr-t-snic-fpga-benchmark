@@ -114,7 +114,10 @@ link: $(HOST_TARGET) $(KERNEL_OBJ)
 .PHONY:
 run:
 	test -e $(HOST_TARGET)
-	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(HOST_TARGET) $(KERNEL_ATTEST_XCLBIN)
+	# RUN ATTEST
+	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(HOST_TARGET) \
+			   -k $(KERNEL_ATTEST_NAME) \
+			   -x $(KERNEL_ATTEST_XCLBIN)
 
 .PHONY:
 check-kernel: check-kernel-attest check-kernel-verify

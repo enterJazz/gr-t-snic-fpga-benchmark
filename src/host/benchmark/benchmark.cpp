@@ -86,6 +86,7 @@ namespace benchmark
         // see https://xilinx.github.io/XRT/2022.1/html/xrt_native_apis.html#other-kernel-apis
         auto run = krnl(boIn, boOut);
         // REFACTORME
+        run.wait();
         run.set_arg(0, boIn);
         run.set_arg(1, boOut);
         // run.wait();

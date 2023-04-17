@@ -8,7 +8,7 @@ extern "C" {
 
     uint32_t counter = 0;
     uint8_t myKey[KEY_LEN] = { 0x0 };
-    void verify(
+    void SYMMETRIC_VERIFY(
             uint8_t *in_msg_hash,   // Read-Only Vector
             uint8_t *in_msg_hmac,   // Read-Only Vector
             bool out_verify_result      // Output Result
