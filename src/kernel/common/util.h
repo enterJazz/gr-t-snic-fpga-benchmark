@@ -1,10 +1,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <ap_fixed.h>           // ap_uint
-
-typedef ap_uint<8> uint8_t;
-typedef ap_uint<32> uint32_t;
+// #include <ap_fixed.h>           // ap_uint
+#include <stdint.h>
 
 // KEY RELEVANT CONSTS
 const uint32_t key_size { 32 };
