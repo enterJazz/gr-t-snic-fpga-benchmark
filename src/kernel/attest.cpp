@@ -1,48 +1,32 @@
 
-//NOTE: if possible, benchmark symmetric vs asymmetric
-
-extern "C" {
-#include <stdint.h> // uint8_t, uint32_t
 #include "util.h"
-    uint32_t counter = 0;
-    uint8_t myKey[KEY_LEN] = { 0x0 };
-    void SYMMETRIC_ATTEST(
-            uint8_t *in_msg_hash,   // Read-Only Vector
-            uint8_t *out_attestation    // Output Result
-            )
-    {
+
+// xf
+#include <xf_security/hmac.hpp>
+#include <ap_fixed.h>           // ap_uint
+
+// ap_uint: optimized for FPGA hardware
+
+uint32_t counter = 0;
+uint8_t myKey[key_size] = { 0x0 };
+void SYMMETRIC_ATTEST(
+    uint8_t in_msg_hash[input_msg_hash_size],   // Read-Only Vector
+    uint8_t out_attestation[hmac_sha256_digest_size]    // Output Result
+)
+{
 #pragma HLS INTERFACE m_axi port=in_msg_hash bundle=aximm1
 #pragma HLS INTERFACE m_axi port=out_attestation bundle=aximm1
     
     // NOTE: difference to trinc in counter in paper -> distinguish between counters
-    compute_msg_hmac(
-        out_attestation,
-        in_msg_hash,
-        counter,
-        myKey
-    );
+//    compute_msg_hmac(
+//        out_attestation,
+//        in_msg_hash,
+//        counter,
+//        myKey
+//    );
 
-    }
+    xf::security::hmac<xf::security::Sha256> hmac(key, KEY_SIZE);
+    hmac.update(message, MESSAGE_SIZE);
+    hmac.finalize(digest);
 }
-
-
-#ifdef _DEBUG_KERNEL_BUILD
-#include <stdio.h> // printf
-#include <hmac-sha256.h> // HMAC_SHA256_DIGEST_SIZE
-#include <stddef.h> // size_t
-int
-main() {    
-    uint8_t in_data[INPUT_MSG_HASH_LEN] = { 0xFF };
-    uint8_t out_data[HMAC_SHA256_DIGEST_SIZE] = { 0x00 };
-    attest(
-        in_data,
-        out_data
-    );
-    
-    for (size_t i = 0; i < HMAC_SHA256_DIGEST_SIZE ; i++) {
-        printf("%x", out_data[i]);
-    }
-    printf("\n");
-}
-#endif
 

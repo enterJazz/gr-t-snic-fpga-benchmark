@@ -12,13 +12,13 @@ compute_msg_hmac(
 	const uint8_t *key
 ) {
 	// populate hmac input w/ zeros
-	uint8_t in_data[INPUT_LEN] = { 0x0 };
+	uint8_t in_data[input_size] = { 0x0 };
 	// stores counter to bytes conversion
-	uint8_t counter_bytes[COUNTER_LEN];
+	uint8_t counter_bytes[counter_size];
 
 	// prepare hmac input
 	// populate input w/ msg_hash
-	for (int i = 0 ; i < INPUT_MSG_HASH_LEN ; i++ ) {
+	for (int i = 0 ; i < input_msg_hash_size ; i++ ) {
 		in_data[i] = msg_hash[i];
 	}
 
@@ -29,8 +29,8 @@ compute_msg_hmac(
 	counter_bytes[2] = (counter >> 8) & 0xFF;
 	counter_bytes[3] = counter & 0xFF;
 
-	for (int i = 0 ; i < COUNTER_LEN ; i++ ) {
-		in_data[INPUT_MSG_HASH_LEN + i] = counter_bytes[i];
+	for (int i = 0 ; i < counter_size ; i++ ) {
+		in_data[input_msg_hash_size + i] = counter_bytes[i];
 	}
 
 	// increment counter ; NOTE differs from trinc
@@ -54,8 +54,8 @@ compute_msg_hmac(
 	hmac_sha256(
 		out,
 		in_data,
-		INPUT_LEN,
+		input_size,
 		key,
-		KEY_LEN
+		key_size
 	);
 }

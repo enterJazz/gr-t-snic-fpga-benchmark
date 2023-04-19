@@ -7,7 +7,7 @@ extern "C" {
 #include <stdbool.h> // bool
 
     uint32_t counter = 0;
-    uint8_t myKey[KEY_LEN] = { 0x0 };
+    uint8_t myKey[key_size] = { 0x0 };
     void SYMMETRIC_VERIFY(
             uint8_t *in_msg_hash,   // Read-Only Vector
             uint8_t *in_msg_hmac,   // Read-Only Vector
@@ -45,7 +45,7 @@ extern "C" {
 #include <stdio.h>
 int
 main() {    
-    uint8_t in_data[INPUT_MSG_HASH_LEN] = { 0xFF };
+    uint8_t in_data[input_msg_hash_size] = { 0xFF };
     uint8_t in_msg_hmac[HMAC_SHA256_DIGEST_SIZE] = { 0x00 };
     bool out_result;
     verify(
