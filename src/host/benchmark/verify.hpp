@@ -14,8 +14,8 @@ namespace benchmark::verify
 {
     void benchmark_verify_kernel(
         std::chrono::duration<double, std::milli> *result,
-        xrt::device         device,
-        const xrt::kernel   in_krnl,
+        xrt::device device,
+        xrt::kernel in_krnl,
         size_t benchmark_execution_iterations
     );
 

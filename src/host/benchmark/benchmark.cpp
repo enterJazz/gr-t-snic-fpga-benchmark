@@ -6,7 +6,8 @@
 #include "benchmark.hpp"
 
 // user
-#include "attest.hpp"   // attest::load_kernel_run
+#include "attest.hpp"   // attest
+#include "verify.hpp"   // verify
 #include "common.hpp"   // input_msg_hash_size, output_attestation_hash_size
 #include "kernel.hpp"
 #include "utils.hpp"    // utils::populate_input_data
@@ -62,7 +63,19 @@ namespace benchmark
 
         std::chrono::duration<double, std::milli> result;
 
-        attest::benchmark_attest_kernel(&result, device, krnl, benchmark_execution_iterations);
+        if (target_kernel == kernel::symmetric_attest)
+        {
+            attest::benchmark_attest_kernel(&result, device, krnl, benchmark_execution_iterations);
+        }
+        else if (target_kernel == kernel::symmetric_verify)
+        {
+            verify::benchmark_verify_kernel(&result, device, krnl, benchmark_execution_iterations);
+        }
+        else
+        {
+            std::cerr << "Kernel not yet benchmarkable: " << target_kernel << "\n";
+            std::exit(EXIT_FAILURE);
+        }
 
         std::cout << "RESULT: " << result.count() << "\n";
 
