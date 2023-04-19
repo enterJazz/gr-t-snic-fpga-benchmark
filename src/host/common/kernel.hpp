@@ -14,7 +14,8 @@ namespace kernel
     enum Kernel
     {
         symmetric_attest,
-        symmetric_verify
+        symmetric_verify,
+        empty
     };
 
     const std::string returnAvailableKernels();

@@ -9,6 +9,8 @@
 // macros
 #define SYMMETRIC_ATTEST_STR "SYMMETRIC_ATTEST"
 #define SYMMETRIC_VERIFY_STR "SYMMETRIC_VERIFY"
+#define EMPTY_STR "EMPTY"
+
 
 namespace kernel
 {
@@ -21,6 +23,7 @@ namespace kernel
         {
             case symmetric_attest:  return SYMMETRIC_ATTEST_STR;
             case symmetric_verify:  return SYMMETRIC_VERIFY_STR;
+            case empty:             return EMPTY_STR;
             default:
                 std::cerr << "given kernel enum: " << kernel << " is invalid.\n";
                 std::exit(EXIT_FAILURE);
@@ -44,6 +47,10 @@ namespace kernel
         else if (kernel_string == SYMMETRIC_VERIFY_STR)
         {
             return symmetric_verify;
+        }
+        else if (kernel_string == EMPTY_STR)
+        {
+            return empty;
         }
         else
         {

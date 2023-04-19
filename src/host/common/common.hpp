@@ -10,6 +10,7 @@ namespace benchmark
 
     const size_t device_input_group_id { 0 };
     const size_t device_output_group_id { 1 };
+
 }
 
 #endif

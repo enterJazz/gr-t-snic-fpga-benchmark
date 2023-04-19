@@ -7,10 +7,11 @@
 
 // user
 #include "attest.hpp"   // attest
+#include "empty.hpp"    // empty
 #include "verify.hpp"   // verify
 #include "common.hpp"   // input_msg_hash_size, output_attestation_hash_size
-#include "kernel.hpp"
-#include "utils.hpp"    // utils::populate_input_data
+#include "kernel.hpp"   // kernel
+#include "utils.hpp"    // utils
 
 // XRT includes
 // see https://xilinx.github.io/XRT/2022.1/html/xrt_native_apis.html
@@ -70,6 +71,10 @@ namespace benchmark
         else if (target_kernel == kernel::symmetric_verify)
         {
             verify::benchmark_verify_kernel(&result, device, krnl, benchmark_execution_iterations);
+        }
+        else if (target_kernel == kernel::empty)
+        {
+            empty::benchmark_empty_kernel(&result, device, krnl, benchmark_execution_iterations);
         }
         else
         {
