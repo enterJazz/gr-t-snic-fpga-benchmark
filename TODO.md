@@ -5,6 +5,7 @@
 - use Xilinx XRT libraries for HMAC
 - add tests to demonstrate validity of functions
 - add `empty` kernel
+- possibly kernel-deps as sub-repo
 
 
 - intro background design eval analysis
