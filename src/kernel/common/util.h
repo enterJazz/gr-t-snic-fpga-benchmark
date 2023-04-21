@@ -9,6 +9,9 @@
 #include <xf_security/hmac.hpp>
 #include <xf_security/sha224_256.hpp>
 
+// removeme
+#include <xf_security/md5.hpp>
+
 // sys includes
 #include <stdint.h>
 #include <stddef.h>     // size_t
@@ -32,7 +35,8 @@ const uint8_t hmac_sha256_digest_size { 32 };
 // template specific consts for hmac / sha256
 const int m_width { 32 };
 const int l_width { 64 };
-const int h_width { 256 };
+// const int h_width { 256 };
+const int h_width { 128 };
 
 // see ./kernel-deps/L1/include/xf_security_hmac.hpp:304
 template <int msgW, int lW, int hshW>
@@ -50,6 +54,20 @@ struct sha256_wrapper
         xf::security::sha256<32>(msg_strm, msg_len_strm, e_len_strm, hsh_strm, e_hsh_strm);
     }
 };
+
+// removeme
+//
+template <int msgW, int lW, int hshW>
+struct md5_wrapper {
+    static void hash(hls::stream<ap_uint<msgW>>& msgStrm,
+                     hls::stream<ap_uint<lW>>& lenStrm,
+                     hls::stream<bool>& eLenStrm,
+                     hls::stream<ap_uint<hshW>>& hshStrm,
+                     hls::stream<bool>& eHshStrm) {
+        xf::security::md5(msgStrm, lenStrm, eLenStrm, hshStrm, eHshStrm);
+    }
+};
+
 
 
 #endif

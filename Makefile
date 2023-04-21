@@ -33,6 +33,8 @@ KERNEL_SRC_DIR := $(SRC_DIR)/kernel
 
 # external dependencies
 KERNEL_DEPS_DIR := ./kernel-deps
+KERNEL_L1_DIR := $(KERNEL_DEPS_DIR)/L1/include
+KERNEL_L1_XF_SECURITY_DIR := $(KERNEL_L1_DIR)/xf_security
 KERNEL_HMAC_DIR := $(KERNEL_DEPS_DIR)/hmac-sha256
 KERNEL_SHA_DIR := $(KERNEL_DEPS_DIR)/sha256
 KERNEL_COMMON_DIR := $(KERNEL_SRC_DIR)/common
@@ -68,7 +70,7 @@ CPP_FLAGS = -g -std=c++17 -Wall -O0
 HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -I$(HOST_SRC_DIR) -I$(HOST_SRC_COMMON_DIR) -I$(HOST_SRC_BENCHMARK_DIR) -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread
 
 KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
-KERNEL_LD_FLAGS = -I$(KERNEL_SRC_DIR) -I$(KERNEL_DEPS_DIR) -I$(KERNEL_HMAC_DIR) -I$(KERNEL_SHA_DIR) -I$(KERNEL_COMMON_DIR)
+KERNEL_LD_FLAGS = -I$(KERNEL_SRC_DIR) -I$(KERNEL_DEPS_DIR) -I$(KERNEL_L1_DIR) -I$(KERNEL_L1_XF_SECURITY_DIR) -I$(KERNEL_COMMON_DIR)
 
 
 # variable args
@@ -112,7 +114,7 @@ platform_config:
 	$(CFGUTIL) --platform $(TARGET_PLATFORM) --od $(BUILD_DIR)
 
 .PHONY:
-kernel: kernel-attest kernel-verify
+kernel: kernel-empty # kernel-attest kernel-verify kernel-empty
 
 .PHONY:
 kernel-attest: $(KERNEL_ATTEST_SRCS)
@@ -128,11 +130,19 @@ kernel-empty: $(KERNEL_EMPTY_SRCS)
 
 
 .PHONY:
-link: $(HOST_TARGET) $(KERNEL_OBJ)
-	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_ATTEST_OBJ) -o $(KERNEL_ATTEST_XCLBIN)
-	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_VERIFY_OBJ) -o $(KERNEL_VERIFY_XCLBIN)
-	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_EMPTY_OBJ) -o $(KERNEL_EMPTY_XCLBIN)
+link: link-empty # link-attest link-verify link-empty
 
+.PHONY:
+link-attest:
+	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_ATTEST_OBJ) -o $(KERNEL_ATTEST_XCLBIN)
+
+.PHONY:
+link-verify:
+	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_VERIFY_OBJ) -o $(KERNEL_VERIFY_XCLBIN)
+
+.PHONY:
+link-empty:
+	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_EMPTY_OBJ) -o $(KERNEL_EMPTY_XCLBIN)
 
 .PHONY:
 run-attest-benchmark:
@@ -187,4 +197,5 @@ clean:
 	rm -r _x/
 	rm ./v++*.log
 	rm xcd.log
+	rm -r .Xil/
 

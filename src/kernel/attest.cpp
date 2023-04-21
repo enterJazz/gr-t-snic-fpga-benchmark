@@ -6,6 +6,7 @@
 // xf
 #include <xf_security/hmac.hpp>
 #include <xf_security/sha224_256.hpp>
+#include <xf_security/md5.hpp>
 // #include <xf_security_L1.hpp>  // xf::security
 #include <ap_fixed.h>           // ap_uint
 
@@ -15,24 +16,18 @@
 #include <stdint.h>
 #include <stddef.h>
 
+extern "C" {
+
 uint32_t counter { 0 };
 const ap_uint<8> my_key[key_size] { 0x0 };
 void SYMMETRIC_ATTEST(
-    ap_uint<8> in_msg_hash[input_msg_hash_size],   // Read-Only Vector
-    ap_uint<8> out_attestation[hmac_sha256_digest_size]    // Output Result
+    uint8_t* in_msg_hash,   // Read-Only Vector
+    uint8_t* out_attestation      // Output Result
 )
 {
 #pragma HLS INTERFACE m_axi port=in_msg_hash bundle=aximm1
 #pragma HLS INTERFACE m_axi port=out_attestation bundle=aximm1
     
-    // NOTE: difference to trinc in counter in paper -> distinguish between counters
-//    compute_msg_hmac(
-//        out_attestation,
-//        in_msg_hash,
-//        counter,
-//        my_key
-//    );
-
     // see https://docs.xilinx.com/r/en-US/Vitis_Libraries/security/guide_L1/hw_api.html_73
 
     // create objects to instantiate the hmac template stream types
@@ -65,8 +60,15 @@ void SYMMETRIC_ATTEST(
     e_len_strm.write(false);
     e_hsh_strm.write(false);
 
-    xf::security::hmac<m_width, l_width, h_width, 32, 512, sha256_wrapper>(key_strm, msg_strm, msg_len_strm, e_len_strm, hsh_strm, e_hsh_strm);
-//    hmac.update(in_msg_hash, input_msg_hash_size);
-//    hmac.update(counter, counter_size);
-//    hmac.finalize(out_attestation);
+    // xf::security::hmac<m_width, l_width, h_width, 32, 512, sha256_wrapper>(key_strm, msg_strm, msg_len_strm, e_len_strm, hsh_strm, e_hsh_strm);
+    // xf::security::hmac<32, 32, 64, 128, 64, md5_wrapper>(key_strm, msg_strm, msg_len_strm, e_len_strm, hsh_strm, e_hsh_strm);
+    // xf::security::hmac<m_width, l_width, h_width, 32, 512, md5_wrapper>(key_strm, msg_strm, msg_len_strm, e_len_strm, hsh_strm, e_hsh_strm);
+
+
+    // read output data
+    // ap_uint<h_width> hsh;
+    // hsh_strm.read(hsh);
+    // std::cout << "RESULT HASH: " << std::hex << hsh << std::endl;
+}
+
 }
