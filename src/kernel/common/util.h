@@ -16,6 +16,19 @@
 #include <stdint.h>
 #include <stddef.h>     // size_t
 
+
+const int msg_size   { 4 };
+const int hash_size  { 32 };
+const int key_l      { 32 };
+const int len_w      { 64 };
+const int key_w      { ( 8 * msg_size ) };
+const int msg_w      { ( 8 * msg_size ) };
+const int hash_w     { ( 8 * hash_size ) };
+const int block_size { 64 };
+
+
+
+
 // KEY RELEVANT CONSTS
 const int key_size { 32 };
 
@@ -33,10 +46,11 @@ const uint8_t hmac_sha256_digest_size { 32 };
 
 
 // template specific consts for hmac / sha256
-const int m_width { 32 };
+// const int m_width { 32 };
+const int m_width { 64 };
 const int l_width { 64 };
-// const int h_width { 256 };
-const int h_width { 128 };
+const int h_width { 256 }; // sha256
+// const int h_width { 128 }; // md5
 
 // see ./kernel-deps/L1/include/xf_security_hmac.hpp:304
 template <int msgW, int lW, int hshW>
@@ -51,7 +65,7 @@ struct sha256_wrapper
         hls::stream<bool>& e_hsh_strm
     )
     {
-        xf::security::sha256<32>(msg_strm, msg_len_strm, e_len_strm, hsh_strm, e_hsh_strm);
+        xf::security::sha256<msg_w>(msg_strm, msg_len_strm, e_len_strm, hsh_strm, e_hsh_strm);
     }
 };
 
