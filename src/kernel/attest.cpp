@@ -22,12 +22,12 @@
 
 
 template <int W>
-unsigned int string2Strm(std::string data, std::string title, hls::stream<ap_uint<W> >& strm) {
+unsigned int string2Strm(const char* data, size_t data_size, hls::stream<ap_uint<W> >& strm) {
     ap_uint<W> oneWord;
     unsigned int n = 0;
     unsigned int cnt = 0;
     // write msg stream word by word
-    for (std::string::size_type i = 0; i < data.length(); i++) {
+    for (std::string::size_type i = 0; i < data_size; i++) {
         if (n == 0) {
             oneWord = 0;
         }
@@ -53,23 +53,37 @@ extern "C" {
 uint32_t counter { 0 };
 const ap_uint<8> my_key[key_size] { 0x0 };
 void SYMMETRIC_ATTEST(
-    uint8_t* in_msg_hash,   // Read-Only Vector
-    uint8_t* out_attestation      // Output Result
+    // uint8_t* in_msg_hash,   // Read-Only Vector
+    // uint8_t* out_attestation      // Output Result
+    hls::stream<ap_uint<key_w>> key_strm,
+    hls::stream<ap_uint<64>> len_key_strm,
+    hls::stream<ap_uint<msg_w>> msg_strm,
+    hls::stream<ap_uint<64>> len_msg_strm,
+    hls::stream<bool> end_len_msg_strm,
+    hls::stream<ap_uint<hash_w>> hash_strm,
+    hls::stream<bool> end_hash_strm
 )
 {
-#pragma HLS INTERFACE m_axi port=in_msg_hash bundle=aximm1
-#pragma HLS INTERFACE m_axi port=out_attestation bundle=aximm1
+// #pragma HLS INTERFACE m_axi port=in_msg_hash bundle=aximm1
+// #pragma HLS INTERFACE m_axi port=out_attestation bundle=aximm1
+#pragma HLS INTERFACE m_axi port=key_strm bundle=aximm1
+#pragma HLS INTERFACE m_axi port=len_key_strm bundle=aximm1
+#pragma HLS INTERFACE m_axi port=msg_strm bundle=aximm1
+#pragma HLS INTERFACE m_axi port=len_msg_strm bundle=aximm1
+#pragma HLS INTERFACE m_axi port=end_len_msg_strm bundle=aximm1
+#pragma HLS INTERFACE m_axi port=hash_strm bundle=aximm1
+#pragma HLS INTERFACE m_axi port=end_hash_strm bundle=aximm1
     
     // see https://docs.xilinx.com/r/en-US/Vitis_Libraries/security/guidend_L1/hw_api.html_73
 
     // create objects to instantiate the hmac template stream types
-    hls::stream<ap_uint<key_w>> key_strm;
-    hls::stream<ap_uint<64>> len_key_strm;
-    hls::stream<ap_uint<msg_w>> msg_strm;
-    hls::stream<ap_uint<64>> len_msg_strm;
-    hls::stream<bool> end_len_msg_strm;
-    hls::stream<ap_uint<hash_w>> hash_strm;
-    hls::stream<bool> end_hash_strm;
+//    hls::stream<ap_uint<key_w>> key_strm;
+//    hls::stream<ap_uint<64>> len_key_strm;
+//    hls::stream<ap_uint<msg_w>> msg_strm;
+//    hls::stream<ap_uint<64>> len_msg_strm;
+//    hls::stream<bool> end_len_msg_strm;
+//    hls::stream<ap_uint<hash_w>> hash_strm;
+//    hls::stream<bool> end_hash_strm;
 
 //    key_strm.write(4);
 //    msg_strm.write(5);
@@ -86,7 +100,7 @@ void SYMMETRIC_ATTEST(
 
     // xf::security::sha256<m_width>(msg_strm, len_msg_strm, end_len_msg_strm, hash_strm, end_hash_strm);
 
-    int none = string2Strm<key_w>(std::string { k }, "key", key_strm);
+    int none = string2Strm<key_w>(k, key_l, key_strm);
 
     end_len_msg_strm.write(false);
     end_len_msg_strm.write(true);
@@ -95,6 +109,10 @@ void SYMMETRIC_ATTEST(
 
 
     xf::security::hmac<msg_w, len_w, hash_w, key_l, block_size, sha256_wrapper>(key_strm, msg_strm, len_msg_strm, end_len_msg_strm, hash_strm, end_hash_strm);
+
+    // to alleviate warnings of vitis_hls
+    // hash_strm.read();
+    // end_hash_strm.read();
 
 
     // set up input data
@@ -131,18 +149,4 @@ void SYMMETRIC_ATTEST(
 }
 
 }
-
-#ifdef _DEBUG_KERNEL_BUILD
-int
-main() {    
-    uint8_t in_data[input_msg_hash_size] = { 0xFF };
-    bool out_result;
-    SYMMETRIC_ATTEST(
-        in_data,
-        out_result
-    );
-    
-
-}
-#endif
 
