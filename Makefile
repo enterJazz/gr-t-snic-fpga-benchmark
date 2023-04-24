@@ -112,7 +112,7 @@ platform_config:
 	$(CFGUTIL) --platform $(TARGET_PLATFORM) --od $(BUILD_DIR)
 
 .PHONY:
-kernel: kernel-attest kernel-verify
+kernel: kernel-attest kernel-verify kernel-empty
 
 .PHONY:
 kernel-attest: $(KERNEL_ATTEST_SRCS)
@@ -128,11 +128,19 @@ kernel-empty: $(KERNEL_EMPTY_SRCS)
 
 
 .PHONY:
-link: $(HOST_TARGET) $(KERNEL_OBJ)
-	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_ATTEST_OBJ) -o $(KERNEL_ATTEST_XCLBIN)
-	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_VERIFY_OBJ) -o $(KERNEL_VERIFY_XCLBIN)
-	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_EMPTY_OBJ) -o $(KERNEL_EMPTY_XCLBIN)
+link: link-attest link-verify link-empty
 
+.PHONY:
+link-attest:
+	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_ATTEST_OBJ) -o $(KERNEL_ATTEST_XCLBIN)
+
+.PHONY:
+link-verify:
+	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_VERIFY_OBJ) -o $(KERNEL_VERIFY_XCLBIN)
+
+.PHONY:
+link-empty:
+	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_EMPTY_OBJ) -o $(KERNEL_EMPTY_XCLBIN)
 
 .PHONY:
 run-attest-benchmark:
@@ -187,4 +195,5 @@ clean:
 	rm -r _x/
 	rm ./v++*.log
 	rm xcd.log
+	rm -r .Xil/
 
