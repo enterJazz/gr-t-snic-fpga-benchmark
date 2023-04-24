@@ -7,7 +7,6 @@
 
 #include "hmac-sha256.h"
 #include "sha256/sha256.h"
-#include "apicheck/apicheck.h"
 
 /*
  * HMAC(H, K) == H(K ^ opad, H(K ^ ipad, text))
@@ -32,11 +31,6 @@ hmac_sha256 (uint8_t out[HMAC_SHA256_DIGEST_SIZE],
              const uint8_t *data, size_t data_len,
              const uint8_t *key, size_t key_len)
 {
-    api_check_return (out);
-    api_check_return (data);
-    api_check_return (key);
-    api_check_return (key_len <= B);
-
     sha256_t ss;
     uint8_t kh[SHA256_DIGEST_SIZE];
 
