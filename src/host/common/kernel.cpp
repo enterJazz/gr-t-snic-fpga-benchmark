@@ -9,6 +9,8 @@
 // macros
 #define SYMMETRIC_ATTEST_STR "SYMMETRIC_ATTEST"
 #define SYMMETRIC_VERIFY_STR "SYMMETRIC_VERIFY"
+#define ASYMMETRIC_ATTEST_STR "ASYMMETRIC_ATTEST"
+#define ASYMMETRIC_VERIFY_STR "ASYMMETRIC_VERIFY"
 #define EMPTY_STR "EMPTY"
 
 
@@ -23,6 +25,8 @@ namespace kernel
         {
             case symmetric_attest:  return SYMMETRIC_ATTEST_STR;
             case symmetric_verify:  return SYMMETRIC_VERIFY_STR;
+            case asymmetric_attest: return ASYMMETRIC_ATTEST_STR;
+            case asymmetric_verify: return ASYMMETRIC_VERIFY_STR;
             case empty:             return EMPTY_STR;
             default:
                 std::cerr << "given kernel enum: " << kernel << " is invalid.\n";
@@ -44,9 +48,17 @@ namespace kernel
         {
             return symmetric_attest;
         }
+        else if (kernel_string == ASYMMETRIC_ATTEST_STR)
+        {
+            return asymmetric_attest;
+        }
         else if (kernel_string == SYMMETRIC_VERIFY_STR)
         {
             return symmetric_verify;
+        }
+        else if (kernel_string == ASYMMETRIC_VERIFY_STR)
+        {
+            return asymmetric_verify;
         }
         else if (kernel_string == EMPTY_STR)
         {

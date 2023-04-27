@@ -64,11 +64,11 @@ namespace benchmark
 
         std::chrono::duration<double, std::milli> result;
 
-        if (target_kernel == kernel::symmetric_attest)
+        if (target_kernel == kernel::symmetric_attest || target_kernel == kernel::asymmetric_attest)
         {
             attest::benchmark_attest_kernel(&result, device, krnl, benchmark_execution_iterations);
         }
-        else if (target_kernel == kernel::symmetric_verify)
+        else if (target_kernel == kernel::symmetric_verify || target_kernel == kernel::asymmetric_verify)
         {
             verify::benchmark_verify_kernel(&result, device, krnl, benchmark_execution_iterations);
         }
