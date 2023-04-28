@@ -28,7 +28,7 @@ namespace benchmark::utils
 
     void benchmark_kernel_execution
     (
-        std::chrono::duration<double, std::milli> *result,
+        std::chrono::microseconds *result,
         xrt::run kernel_run,
         size_t benchmark_execution_iterations
     )
@@ -38,21 +38,22 @@ namespace benchmark::utils
         // sum the execution time for each iteration,
         // divide by number of executions to obtain average execution time
         // as result
-        auto total_exec_dur = std::chrono::duration<double, std::milli>::zero();
+        std::chrono::microseconds total_exec_dur { std::chrono::microseconds::zero() };
 
         for (size_t i_exec = 0; i_exec < benchmark_execution_iterations ; i_exec++)
         {
-            auto start = std::chrono::steady_clock::now();
+            std::chrono::steady_clock::time_point start { std::chrono::steady_clock::now() };
 
             kernel_run.start();
             kernel_run.wait();
 
-            auto end = std::chrono::steady_clock::now();
-            auto diff = end - start;
+            std::chrono::steady_clock::time_point end { std::chrono::steady_clock::now() };
+            std::chrono::microseconds diff { std::chrono::duration_cast<std::chrono::microseconds>(end - start) };
+
             total_exec_dur += diff;
         }
 
-        auto avg_exec_dur = total_exec_dur / benchmark_execution_iterations;
+        std::chrono::microseconds avg_exec_dur = total_exec_dur / benchmark_execution_iterations;
 
         *result = avg_exec_dur;
     }

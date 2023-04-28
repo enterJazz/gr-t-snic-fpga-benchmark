@@ -17,7 +17,7 @@ namespace benchmark::utils
 
     void benchmark_kernel_execution
     (
-        std::chrono::duration<double, std::milli> *result,
+        std::chrono::microseconds *result,
         xrt::run kernel_run,
         size_t benchmark_execution_iterations
     );

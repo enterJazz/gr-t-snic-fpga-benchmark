@@ -90,7 +90,7 @@ CFGUTIL = emconfigutil
 # target platform of the FPGA
 TARGET_PLATFORM = xilinx_u280_gen3x16_xdma_1_202211_1
 # compile target of VC [sw_emu|hw_emu|hw]
-COMPILE_TARGET = sw_emu
+COMPILE_TARGET = hw
 
 # CFLAGS = -Ideps -Wall
 CPP_FLAGS = -g -std=c++17 -Wall -O0
@@ -102,7 +102,7 @@ KERNEL_ASYM_LD_FLAGS = -I$(KERNEL_ASYM_SRC_DIR) -I$(KERNEL_ASYM_MONOCYPHER_DIR) 
 
 
 # variable args
-NUM_BENCHMARK_ITERATIONS = 1
+NUM_BENCHMARK_ITERATIONS = 10000
 
 ## execution
 HOST_EXEC_KERNEL_ATTEST_SYM_ARGS := -k $(KERNEL_SYM_ATTEST_NAME) -x $(KERNEL_SYM_ATTEST_XCLBIN) -n $(NUM_BENCHMARK_ITERATIONS)

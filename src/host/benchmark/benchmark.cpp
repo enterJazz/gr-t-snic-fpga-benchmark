@@ -23,6 +23,7 @@
 // System includes
 //#include "cmdlineparser.h"
 #include <iostream>     // std::cerr
+#include <chrono>
 #include <cstdlib>      // std::exit, EXIT_FAILURE
 #include <cstring>
 #include <stddef.h>     // size_t
@@ -62,7 +63,7 @@ namespace benchmark
         );
 
 
-        std::chrono::duration<double, std::milli> result;
+        std::chrono::microseconds result;
 
         if (target_kernel == kernel::symmetric_attest || target_kernel == kernel::asymmetric_attest)
         {
@@ -82,7 +83,7 @@ namespace benchmark
             std::exit(EXIT_FAILURE);
         }
 
-        std::cout << "RESULT: " << result.count() << "\n";
+        std::cout << "RESULT: " << result.count() << " µs\n";
 
         // get the output from the device
         // boOut.sync(XCL_BO_SYNC_BO_FROM_DEVICE);
