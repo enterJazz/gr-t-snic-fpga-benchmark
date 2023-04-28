@@ -9,6 +9,7 @@ namespace benchmark
     const uint8_t hmac_sha256_digest_size { 32 };
     // ASYM CASE: EdDSA signature size
     const uint8_t eddsa_signature_size { 64 };
+    const uint8_t eddsa_pubkey_size { 32 };
 
     const size_t device_input_group_id { 0 };
     const size_t device_output_group_id { 1 };
