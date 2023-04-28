@@ -1,5 +1,6 @@
 
 #include "attest.hpp"
+#include "kernel.hpp"
 
 // user includes
 #include "common.hpp"
@@ -21,9 +22,13 @@ namespace benchmark::attest
         std::chrono::duration<double, std::milli> *result,
         xrt::device device,
         xrt::kernel in_krnl,
+        kernel::Kernel krnl_type,   // sym / asym have different inputs
         size_t benchmark_execution_iterations
     )
     {
+
+        uint8_t output_attestation_size { (krnl_type == kernel::symmetric_verify) ? hmac_sha256_digest_size : eddsa_signature_size };
+
         // Allocate Buffer in Global Memory
         // share memory between host and FPGA kernel
         //
@@ -31,14 +36,14 @@ namespace benchmark::attest
         // Match kernel arguments to RTL kernel
         auto bo_in_msg_hash = xrt::bo(device, input_msg_hash_size, in_krnl.group_id(device_input_group_id));
         // output buffer
-        auto bo_out = xrt::bo(device, output_attestation_hash_size, in_krnl.group_id(device_output_group_id));
+        auto bo_out = xrt::bo(device, output_attestation_size, in_krnl.group_id(device_output_group_id));
 
         // Map the contents of the buffer object into host memory
         // NOTE: message contents in here
         auto bo0_map = bo_in_msg_hash.map<uint8_t*>();
         auto bo1_map = bo_out.map<uint8_t*>();
         std::fill(bo0_map, bo0_map + input_msg_hash_size, 0);
-        std::fill(bo1_map, bo1_map + output_attestation_hash_size, 0);
+        std::fill(bo1_map, bo1_map + output_attestation_size, 0);
 
         utils::populate_input_data(bo0_map, input_msg_hash_size);
 

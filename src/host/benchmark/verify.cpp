@@ -3,6 +3,7 @@
 
 // user includes
 #include "common.hpp"
+#include "kernel.hpp"   // kernel
 #include "utils.hpp"    // utils
 
 // XRT includes
@@ -20,6 +21,7 @@ namespace benchmark::verify
         std::chrono::duration<double, std::milli> *result,
         xrt::device device,
         xrt::kernel in_krnl,
+        kernel::Kernel krnl_type,   // sym / asym have different inputs
         size_t benchmark_execution_iterations
     )
     {
@@ -34,16 +36,20 @@ namespace benchmark::verify
             in_krnl.group_id(device_input_group_id)
         );
 
+        uint8_t output_attestation_size { (krnl_type == kernel::symmetric_verify) ? hmac_sha256_digest_size : eddsa_signature_size };
+
+        // TODO: is attestation len different
+        // NOTE yes is is, 64 (sig) vs 32 (hmac)
         auto bo_in_attestation = xrt::bo(
             device,
-            output_attestation_hash_size,
+            output_attestation_size,
             in_krnl.group_id(device_input_group_id)
         );
 
         // output buffer
         auto bo_out = xrt::bo(
             device,
-            output_attestation_hash_size,
+            output_attestation_size,
             in_krnl.group_id(device_output_group_id)
         );
 
@@ -60,14 +66,14 @@ namespace benchmark::verify
         );
         std::fill(
             bo_in_attestation_map,
-            bo_in_attestation_map + output_attestation_hash_size,
+            bo_in_attestation_map + output_attestation_size,
             0
         );
-        std::fill(bo_out_map, bo_out_map + output_attestation_hash_size, 0);
+        std::fill(bo_out_map, bo_out_map + output_attestation_size, 0);
 
         // TODO replace with std::genereate ( ... , std::rand )
         utils::populate_input_data(bo_in_msg_hash_map, input_msg_hash_size);
-        utils::populate_input_data(bo_in_attestation_map, output_attestation_hash_size);
+        utils::populate_input_data(bo_in_attestation_map, output_attestation_size);
 
         // synchronize input buffer data to device global memory
         bo_in_msg_hash.sync(XCL_BO_SYNC_BO_TO_DEVICE);

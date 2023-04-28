@@ -1,6 +1,8 @@
 #ifndef VERIFY_HPP
 #define VERIFY_HPP
 
+#include "kernel.hpp"
+
 // XRT includes
 // xrt
 #include <xrt/xrt_device.h> // device
@@ -16,6 +18,7 @@ namespace benchmark::verify
         std::chrono::duration<double, std::milli> *result,
         xrt::device device,
         xrt::kernel in_krnl,
+        kernel::Kernel krnl_type,   // sym / asym have different inputs
         size_t benchmark_execution_iterations
     );
 

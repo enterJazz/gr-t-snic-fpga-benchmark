@@ -13,7 +13,7 @@ extern "C" {
             uint8_t in_msg_hash[msg_hash_len],   // Read-Only Vector
             uint8_t in_msg_attestation[attestation_len],   // Read-Only Vector
             uint8_t in_pub_key[public_key_len],
-            bool out_verify_result      // Output Result
+            uint8_t *out_verify_result      // Output Result
             )
     {
 #pragma HLS INTERFACE m_axi port=in_msg_hash bundle=aximm1
@@ -34,7 +34,6 @@ extern "C" {
             counter
         );
 
-        // TODO concat counter and msg_hash
         uint8_t result = crypto_eddsa_check
         (
             in_msg_attestation,
@@ -46,11 +45,11 @@ extern "C" {
         if (result == signature_legit)
         {
             counter++;
-            out_verify_result = true;
+            out_verify_result[0] = true;
         }
         else
         {
-            out_verify_result = false;
+            out_verify_result[0] = false;
         }
     }
 }

@@ -66,11 +66,11 @@ namespace benchmark
 
         if (target_kernel == kernel::symmetric_attest || target_kernel == kernel::asymmetric_attest)
         {
-            attest::benchmark_attest_kernel(&result, device, krnl, benchmark_execution_iterations);
+            attest::benchmark_attest_kernel(&result, device, krnl, target_kernel, benchmark_execution_iterations);
         }
         else if (target_kernel == kernel::symmetric_verify || target_kernel == kernel::asymmetric_verify)
         {
-            verify::benchmark_verify_kernel(&result, device, krnl, benchmark_execution_iterations);
+            verify::benchmark_verify_kernel(&result, device, krnl, target_kernel, benchmark_execution_iterations);
         }
         else if (target_kernel == kernel::empty)
         {
