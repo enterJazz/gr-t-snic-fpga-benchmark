@@ -6,12 +6,11 @@
 #include <iostream>     // cerr
 #include <string>       // string
 
-// macros
-#define SYMMETRIC_ATTEST_STR "SYMMETRIC_ATTEST"
-#define SYMMETRIC_VERIFY_STR "SYMMETRIC_VERIFY"
-#define ASYMMETRIC_ATTEST_STR "ASYMMETRIC_ATTEST"
-#define ASYMMETRIC_VERIFY_STR "ASYMMETRIC_VERIFY"
-#define EMPTY_STR "EMPTY"
+const std::string symmetric_attest_str { "SYMMETRIC_ATTEST" };
+const std::string symmetric_verify_str { "SYMMETRIC_VERIFY" };
+const std::string asymmetric_attest_str { "ASYMMETRIC_ATTEST" };
+const std::string asymmetric_verify_str { "ASYMMETRIC_VERIFY" };
+const std::string empty_str { "EMPTY" };
 
 
 namespace kernel
@@ -23,11 +22,11 @@ namespace kernel
     {
         switch(kernel)
         {
-            case symmetric_attest:  return SYMMETRIC_ATTEST_STR;
-            case symmetric_verify:  return SYMMETRIC_VERIFY_STR;
-            case asymmetric_attest: return ASYMMETRIC_ATTEST_STR;
-            case asymmetric_verify: return ASYMMETRIC_VERIFY_STR;
-            case empty:             return EMPTY_STR;
+            case symmetric_attest:  return symmetric_attest_str;
+            case symmetric_verify:  return symmetric_verify_str;
+            case asymmetric_attest: return asymmetric_attest_str;
+            case asymmetric_verify: return asymmetric_verify_str;
+            case empty:             return empty_str;
             default:
                 std::cerr << "given kernel enum: " << kernel << " is invalid.\n";
                 std::exit(EXIT_FAILURE);
@@ -44,23 +43,23 @@ namespace kernel
 
     const Kernel stringToKernel(const std::string kernel_string)
     {
-        if (kernel_string == SYMMETRIC_ATTEST_STR)
+        if (kernel_string == symmetric_attest_str)
         {
             return symmetric_attest;
         }
-        else if (kernel_string == ASYMMETRIC_ATTEST_STR)
+        else if (kernel_string == asymmetric_attest_str)
         {
             return asymmetric_attest;
         }
-        else if (kernel_string == SYMMETRIC_VERIFY_STR)
+        else if (kernel_string == symmetric_verify_str)
         {
             return symmetric_verify;
         }
-        else if (kernel_string == ASYMMETRIC_VERIFY_STR)
+        else if (kernel_string == asymmetric_verify_str)
         {
             return asymmetric_verify;
         }
-        else if (kernel_string == EMPTY_STR)
+        else if (kernel_string == empty_str)
         {
             return empty;
         }

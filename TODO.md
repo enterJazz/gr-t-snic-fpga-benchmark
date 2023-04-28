@@ -5,4 +5,5 @@
 - add tests to demonstrate validity of functions
 - correct inputs for verify kernel
 - figure out if memory group ids should be changed
+- fix benchmarking
 
