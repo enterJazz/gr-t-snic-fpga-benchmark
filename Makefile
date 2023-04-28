@@ -122,7 +122,7 @@ HOST_EXEC_KERNEL_EMPTY_ARGS := -k $(KERNEL_EMPTY_NAME) -x $(KERNEL_EMPTY_XCLBIN)
 
 $(TARGET): all
 
-all: check-prerequisites init host platform_config kernel link-sym
+all: check-prerequisites init host platform_config kernel link
 # all: $(TARGET)
 
 check-prerequisites:
@@ -140,7 +140,11 @@ host: $(HOST_SRCS)
 platform_config:
 	$(CFGUTIL) --platform $(TARGET_PLATFORM) --od $(BUILD_DIR)
 
-kernel: kernel-sym-attest kernel-sym-verify kernel-empty
+kernel: kernel-sym kernel-asym
+
+kernel-sym: kernel-sym-attest kernel-sym-verify kernel-empty
+
+kernel-asym: kernel-asym-attest kernel-asym-verify
 
 kernel-sym-attest: $(KERNEL_SYM_ATTEST_SRCS)
 	$(VC)  --kernel $(KERNEL_SYM_ATTEST_NAME) --compile $(KERNEL_VC_FLAGS) $(KERNEL_SYM_LD_FLAGS) $(KERNEL_SYM_ATTEST_SRCS) -o $(KERNEL_SYM_ATTEST_OBJ)
@@ -158,7 +162,11 @@ kernel-asym-verify: $(KERNEL_ASYM_VERIFY_SRCS)
 	$(VC)  --kernel $(KERNEL_ASYM_VERIFY_NAME) --compile $(KERNEL_VC_FLAGS) $(KERNEL_ASYM_LD_FLAGS) $(KERNEL_ASYM_VERIFY_SRCS) -o $(KERNEL_ASYM_VERIFY_OBJ)
 
 
+link: link-sym link-asym
+
 link-sym: link-sym-attest link-sym-verify link-empty
+
+link-asym: link-asym-attest link-asym-verify
 
 link-sym-attest:
 	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_SYM_ATTEST_OBJ) -o $(KERNEL_SYM_ATTEST_XCLBIN)
