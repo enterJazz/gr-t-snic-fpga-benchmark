@@ -8,10 +8,12 @@ extern "C" {
 
     uint32_t counter = 0;
     uint8_t myKey[KEY_LEN] = { 0x0 };
+    // TODO: input is given as one large array; not two
+    // remove one array / check examples
     void SYMMETRIC_VERIFY(
-            uint8_t *in_msg_hash,   // Read-Only Vector
-            uint8_t *in_msg_hmac,   // Read-Only Vector
-            bool out_verify_result      // Output Result
+            uint8_t* in_msg_hash,   // Read-Only Vector
+            uint8_t* in_msg_hmac,   // Read-Only Vector
+            uint8_t* out_verify_result      // Output Result
             )
     {
 #pragma HLS INTERFACE m_axi port=in_msg_hash bundle=aximm1
@@ -30,12 +32,12 @@ extern "C" {
     // compare hash results
     for (size_t i = 0 ; i < HMAC_SHA256_DIGEST_SIZE ; i++) {
         if (in_msg_hmac[i] != own_msg_hmac[i]) {
-            out_verify_result = false;
+            out_verify_result[0] = false;
             return;
         }
     }
 
-    out_verify_result = true;
+    out_verify_result[0] = true;
 
     }
 }
