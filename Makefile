@@ -123,6 +123,8 @@ HOST_EXEC_KERNEL_EMPTY_ARGS := -k $(KERNEL_EMPTY_NAME) -x $(KERNEL_EMPTY_XCLBIN)
 $(TARGET): all
 
 all: check-prerequisites init host platform_config kernel link
+all-sym: check-prerequisites init host platform_config kernel-sym link-sym
+all-asym: check-prerequisites init host platform_config kernel-asym link-asym
 # all: $(TARGET)
 
 check-prerequisites:

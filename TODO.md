@@ -1,9 +1,7 @@
 
 # TODOs
 
-- use Xilinx XRT libraries for HMAC
+- use Xilinx XRT libraries for HMAC (optional; only if current impl not fast enough)
 - add tests to demonstrate validity of functions
-- correct inputs for verify kernel
 - figure out if memory group ids should be changed
-- fix benchmarking
 
