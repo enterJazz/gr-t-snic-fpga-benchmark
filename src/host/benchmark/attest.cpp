@@ -13,6 +13,7 @@
 #include <xrt/xrt_kernel.h> // kernel, run
 
 // std
+#include <algorithm>    // std::copy
 #include <chrono>
 #include <stdint.h>         // uint8_t
 
@@ -30,7 +31,6 @@ namespace benchmark::attest
         uint8_t* attestation_result
     )
     {
-
         uint8_t output_attestation_size { (krnl_type == kernel::symmetric_verify) ? hmac_sha256_digest_size : eddsa_signature_size };
 
         // Allocate Buffer in Global Memory
@@ -46,10 +46,11 @@ namespace benchmark::attest
         // NOTE: message contents in here
         auto bo0_map = bo_in_msg_hash.map<uint8_t*>();
         auto bo1_map = bo_out.map<uint8_t*>();
-        std::fill(bo0_map, bo0_map + input_msg_hash_size, 0);
+
+        utils::copy_else_fill(bo0_map, input_msg_hash_size, preset_msg_hash);
+
         std::fill(bo1_map, bo1_map + output_attestation_size, 0);
 
-        utils::populate_input_data(bo0_map, input_msg_hash_size);
 
         // synchronize input buffer data to device global memory
         bo_in_msg_hash.sync(XCL_BO_SYNC_BO_TO_DEVICE);
@@ -62,6 +63,13 @@ namespace benchmark::attest
         run.wait();
 
         utils::benchmark_kernel_execution(result, run, benchmark_execution_iterations);
+
+        if (attestation_result)
+        {
+            // synchronize output device global memory to buffer data
+            bo_out.sync(XCL_BO_SYNC_BO_TO_DEVICE);
+            std::copy(attestation_result, attestation_result + output_attestation_size, bo1_map);
+        }
     }
 }
 

@@ -69,27 +69,15 @@ namespace benchmark::verify
         auto bo_in_pubkey_map = bo_in_pubkey.map<uint8_t*>();
         auto bo_out_map = bo_out.map<uint8_t*>();
 
-        std::fill(
-            bo_in_msg_hash_map,
-            bo_in_msg_hash_map,
-            0
-        );
-        std::fill(
-            bo_in_attestation_map,
-            bo_in_attestation_map + output_attestation_size,
-            0
-        );
-        std::fill(
-            bo_in_pubkey_map,
-            bo_in_pubkey_map + eddsa_pubkey_size,
-            0
-        );
+        // TODO: DRY, do as func
+
+        utils::copy_else_fill(bo_in_msg_hash_map, input_msg_hash_size, preset_msg_hash);
+        utils::copy_else_fill(bo_in_attestation_map, output_attestation_size, preset_msg_attestation);
+        utils::copy_else_fill(bo_in_pubkey_map, eddsa_pubkey_size, preset_pubkey);
+
         std::fill(bo_out_map, bo_out_map + output_attestation_size, 0);
 
         // TODO replace with std::genereate ( ... , std::rand )
-        utils::populate_input_data(bo_in_msg_hash_map, input_msg_hash_size);
-        utils::populate_input_data(bo_in_attestation_map, output_attestation_size);
-        utils::populate_input_data(bo_in_pubkey_map, eddsa_pubkey_size);
 
         // synchronize input buffer data to device global memory
         bo_in_msg_hash.sync(XCL_BO_SYNC_BO_TO_DEVICE);
@@ -105,6 +93,12 @@ namespace benchmark::verify
 
         utils::benchmark_kernel_execution(result, run, benchmark_execution_iterations);
        
+        if (attestation_result)
+        {
+            // synchronize output device global memory to buffer data
+            bo_out.sync(XCL_BO_SYNC_BO_TO_DEVICE);
+            std::copy(attestation_result, attestation_result + output_attestation_size, bo_out_map);
+        }
     }
 }
 

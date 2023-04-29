@@ -5,6 +5,7 @@
 #include <xrt/xrt_kernel.h> // xrt::run
 
 // std
+#include <algorithm> // fill, copy
 #include <chrono>   // chrono
 #include <random>   // mt19937
 #include <stddef.h> // size_t
@@ -56,6 +57,34 @@ namespace benchmark::utils
         std::chrono::microseconds avg_exec_dur = total_exec_dur / benchmark_execution_iterations;
 
         *result = avg_exec_dur;
+    }
+
+
+    // if source is not a nullptr, copy; else, fill target w/ random nums
+    void copy_else_fill
+    (
+        uint8_t* target,
+        size_t copy_range,
+        uint8_t* source
+    )
+    {
+        if (!source)
+        {
+            std::fill(
+                target,
+                target + copy_range,
+                0
+            );
+            populate_input_data(target, copy_range);
+        }
+        else
+        {
+            std::copy(
+                target,
+                target + copy_range,
+                source
+            );
+        }
     }
 
 }
