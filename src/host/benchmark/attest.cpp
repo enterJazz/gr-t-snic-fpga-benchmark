@@ -24,7 +24,10 @@ namespace benchmark::attest
         xrt::device device,
         xrt::kernel in_krnl,
         kernel::Kernel krnl_type,   // sym / asym have different inputs
-        size_t benchmark_execution_iterations
+        size_t benchmark_execution_iterations,
+        // optional params- currently only used for testing
+        uint8_t* preset_msg_hash,
+        uint8_t* attestation_result
     )
     {
 

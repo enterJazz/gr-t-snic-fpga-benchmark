@@ -20,7 +20,11 @@ namespace benchmark::verify
         xrt::device device,
         xrt::kernel in_krnl,
         kernel::Kernel krnl_type,   // sym / asym have different inputs
-        size_t benchmark_execution_iterations
+        size_t benchmark_execution_iterations,
+        uint8_t* preset_msg_hash=nullptr,
+        uint8_t* preset_msg_attestation=nullptr,
+        uint8_t* preset_pubkey=nullptr,
+        uint8_t* attestation_result=nullptr
     );
 
 }

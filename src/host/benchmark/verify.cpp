@@ -23,7 +23,12 @@ namespace benchmark::verify
         xrt::device device,
         xrt::kernel in_krnl,
         kernel::Kernel krnl_type,   // sym / asym have different inputs
-        size_t benchmark_execution_iterations
+        size_t benchmark_execution_iterations,
+        // optional params- currently only used for testing
+        uint8_t* preset_msg_hash,
+        uint8_t* preset_msg_attestation,
+        uint8_t* preset_pubkey,
+        uint8_t* attestation_result
     )
     {
         uint8_t output_attestation_size { (krnl_type == kernel::symmetric_verify) ? hmac_sha256_digest_size : eddsa_signature_size };
