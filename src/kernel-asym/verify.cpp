@@ -7,6 +7,8 @@ extern "C" {
 #include <stdint.h>  // uint8_t, uint32_t
 #include <stdbool.h> // bool
 
+    using namespace common::asym;
+
     uint32_t counter { 0 };
     const uint8_t signature_legit { 0 };
     void ASYMMETRIC_VERIFY(
