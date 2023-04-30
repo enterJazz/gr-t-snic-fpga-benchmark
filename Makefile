@@ -44,8 +44,15 @@ HOST_SRC_DIR := $(SRC_DIR)/host
 HOST_SRC_COMMON_DIR := $(HOST_SRC_DIR)/common
 HOST_SRC_BENCHMARK_DIR := $(HOST_SRC_DIR)/benchmark
 
+# specific host srcs required by test
+HOST_SRC_ATTEST := $(HOST_SRC_BENCHMARK_DIR)/attest.cpp
+HOST_SRC_UTILS := $(HOST_SRC_BENCHMARK_DIR)/utils.cpp
+HOST_SRC_KERNEL := $(HOST_SRC_COMMON_DIR)/kernel.cpp
+
 # test srcs
 TEST_SRC_DIR := ./test
+TEST_SRC_MAIN := $(TEST_SRC_DIR)/catch_main.cpp
+TEST_SRC_MAIN_OBJ := $(BUILD_DIR)/catch_main.o
 
 KERNEL_SYM_SRC_DIR := $(SRC_DIR)/kernel-sym
 KERNEL_ASYM_SRC_DIR := $(SRC_DIR)/kernel-asym
@@ -70,13 +77,14 @@ KERNEL_ASYM_MONOCYPHER_OPTIONAL_DIR := $(KERNEL_ASYM_DEPS_DIR)/monocypher-4.0.1/
 HOST_SRCS := $(shell find $(HOST_SRC_DIR) -name '*.cpp' -or -name '*.c' -or -name '*.s')
 
 # test resources
-TEST_DEPS_DIRS := $(KERNEL_ASYM_MONOCYPHER_DIR) $(KERNEL_ASYM_MONOCYPHER_OPTIONAL_DIR)
-TEST_DEPS_SRCS := $(shell find $(TEST_DEPS_DIRS) -name '*.cpp' -or -name '*.c' -or -name '*.s')
-TEST_SRCS := $(shell find $(TEST_SRC_DIR) -name '*.cpp' -or -name '*.c' -or -name '*.s')  $(shell printf '$(HOST_SRCS)' | sed 's/\.\/src\/host\/main.cpp//' ) $(TEST_DEPS_SRCS)
+# includes specific host src files which are tested
+TEST_HOST_SRCS := $(HOST_SRC_ATTEST) $(HOST_SRC_UTILS) $(HOST_SRC_KERNEL)
+TEST_SRCS := $(shell find $(TEST_SRC_DIR) -not -path "$(TEST_SRC_MAIN)" -name '*.cpp' -or -name '*.c' -or -name '*.s') $(TEST_HOST_SRCS) $(TEST_SRC_MAIN_OBJ)
 
 # test includes
-TEST_INC_DIRS := $(shell find $(TEST_DEPS_DIRS) $(TEST_SRC_DIR) $(HOST_SRC_DIR) -type d) $(TEST_SRC_DIR)
+TEST_INC_DIRS := $(shell find $(TEST_SRC_DIR) $(HOST_SRC_BENCHMARK_DIR) $(HOST_SRC_COMMON_DIR) -type d) $(TEST_SRC_DIR)
 TEST_INC_FLAGS := $(addprefix -I,$(TEST_INC_DIRS))
+TEST_LD_FLAGS := -lxrt_coreutil -pthread -L$(XILINX_XRT)/lib -I$(XILINX_XRT)/include/
 
 KERNEL_SYM_DEPS_SRCS := $(shell find $(KERNEL_SYM_DEPS_DIR) $(KERNEL_SYM_COMMON_DIR) -name '*.cpp' -or -name '*.c')
 KERNEL_SYM_ATTEST_SRCS := $(KERNEL_SYM_SRC_DIR)/attest.cpp $(KERNEL_SYM_DEPS_SRCS)
@@ -106,8 +114,8 @@ TARGET_PLATFORM = xilinx_u280_gen3x16_xdma_1_202211_1
 COMPILE_TARGET = sw_emu
 
 # CFLAGS = -Ideps -Wall
-CPP_FLAGS = -g -std=c++17 -Wall -O0
-HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -I$(HOST_SRC_DIR) -I$(HOST_SRC_COMMON_DIR) -I$(HOST_SRC_BENCHMARK_DIR) -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread
+CPP_FLAGS = -g -std=c++17 -Wall
+HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -I$(HOST_SRC_DIR) -I$(HOST_SRC_COMMON_DIR) -I$(HOST_SRC_BENCHMARK_DIR) -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread -O0
 
 KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
 KERNEL_SYM_LD_FLAGS = -I$(KERNEL_SYM_SRC_DIR) -I$(KERNEL_SYM_DEPS_DIR) -I$(KERNEL_SYM_HMAC_DIR) -I$(KERNEL_SYM_SHA_DIR) -I$(KERNEL_SYM_COMMON_DIR)
@@ -270,12 +278,14 @@ check-kernel-sym-verify:
 
 
 # tests
-test-asym-attest:
-	// FIXME
-	# $(CPP)  $(HOST_LD_FLAGS) $(TEST_INC_FLAGS) $(CPP_FLAGS) $(TEST_SRCS) -o $(TEST_TARGET)
-	# g++ -g -std=c++17 -I$XILINX_XRT/include -L$XILINX_XRT/lib -o build/test.exe build/catch_main.o test/test_utils.cpp src/host/common/kernel.cpp ./test/asym/attest.cpp -lxrt_coreutil -pthread -I ./test -I ./test/catch2 -I ./src/host/common -I ./src/host/benchmark
-	g++ -g -std=c++17 -I$XILINX_XRT/include -L$XILINX_XRT/lib -o build/test.exe build/catch_main.o test/test_utils.cpp src/host/common/kernel.cpp ./test/asym/attest.cpp ./src/host/benchmark/attest.cpp ./src/host/benchmark/utils.cpp -lxrt_coreutil -pthread -I ./test -I ./test/catch2 -I ./src/host/common -I ./src/host/benchmark
-	XCL_EMULATION_MODE=sw_emu KERNEL_ASYM_ATTEST_XCLBIN=./build/ASYMMETRIC_VERIFY.xclbin  ./build/test.exe
+$(TEST_SRC_MAIN_OBJ):
+	$(CPP) $(TEST_INC_FLAGS) -c $(TEST_SRC_MAIN) -o $(TEST_SRC_MAIN_OBJ)
+
+test-asym-attest: $(TEST_SRC_MAIN_OBJ)
+	# FIXME
+	g++ -g -std=c++17 -I$(XILINX_XRT)/include -L$(XILINX_XRT)/lib -o build/test.exe build/catch_main.o test/test_utils.cpp src/host/common/kernel.cpp ./test/asym/attest.cpp ./src/host/benchmark/attest.cpp ./src/host/benchmark/utils.cpp -lxrt_coreutil -pthread -I ./test -I ./test/catch2 -I ./src/host/common -I ./src/host/benchmark
+	# $(CPP)  $(TEST_LD_FLAGS) $(TEST_INC_FLAGS) $(CPP_FLAGS) $(TEST_SRCS) -o $(TEST_TARGET)
+	XCL_EMULATION_MODE=sw_emu KERNEL_ASYM_ATTEST_XCLBIN=./build/ASYMMETRIC_ATTEST.xclbin  ./build/test.exe
 
 clean:
 	rm -rf $(BUILD_DIR)
