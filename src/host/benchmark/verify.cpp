@@ -97,7 +97,8 @@ namespace benchmark::verify
         {
             // synchronize output device global memory to buffer data
             bo_out.sync(XCL_BO_SYNC_BO_TO_DEVICE);
-            std::copy(attestation_result, attestation_result + output_attestation_size, bo_out_map);
+            // only copy a bool
+            std::copy(bo_out_map, bo_out_map, attestation_result);
         }
     }
 }

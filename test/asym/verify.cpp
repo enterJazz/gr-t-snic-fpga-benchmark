@@ -3,7 +3,7 @@
 // source includes
 #include "common.hpp"   // benchmark
 #include "kernel.hpp"   // kernel
-#include "attest.hpp"   // benchmark::attest
+#include "verify.hpp"   // benchmark::verify
 #include "utils.hpp"
 
 // test includes
@@ -18,25 +18,25 @@
 // system includes
 #include <algorithm>    // std::copy
 #include <chrono>       // chrono
-#include <cstring>   // std::memcpy
+#include <cstring>      // std::memcpy
 #include <filesystem>   // std::filesystem::path
 
 #include <iostream>
 
 namespace bm = benchmark;
 namespace tu = test_utils;
-namespace attest = benchmark::attest;
+namespace verify = benchmark::verify;
 
-SCENARIO( "the asymmetric attest kernel computes valid attestations" )
+SCENARIO( "the asymmetric verify kernel distinguised in-/valid attestations" )
 {
     GIVEN( "the kernel, set to execute in sw_emu" )
     {
         REQUIRE( tu::get_env_var(tu::xcl_emulation_mode_env_var) == tu::xcl_sw_emu_mode );
 
-        std::filesystem::path kernel_xlcbin_path { tu::get_env_var(tu::kernel_asym_attest_path_env_var) };
+        std::filesystem::path kernel_xlcbin_path { tu::get_env_var(tu::kernel_asym_verify_path_env_var) };
         REQUIRE( !kernel_xlcbin_path.empty() );
 
-        const kernel::Kernel asym_kernel_type { kernel::asymmetric_attest };
+        const kernel::Kernel asym_kernel_type { kernel::asymmetric_verify };
 
         // xrt specific params
         auto device { xrt::device(0) };
@@ -55,14 +55,19 @@ SCENARIO( "the asymmetric attest kernel computes valid attestations" )
 
         WHEN( "we execute the kernel with pre-set inputs" )
         {
+            // prepare inputs
+            // copy as source is const
             uint8_t preset_msg_hash[bm::input_msg_hash_size] { 0x00 };
-            // copy here as msg_hash is const
             std::memcpy(preset_msg_hash, tu::msg_hash, bm::input_msg_hash_size);
-            uint8_t attestation_result[bm::eddsa_signature_size] { 0x00 };
+            uint8_t preset_attestation_result[bm::eddsa_signature_size] { 0x00 };
+            std::memcpy(preset_attestation_result, tu::expected_signature, bm::eddsa_signature_size);
+            uint8_t preset_pubkey[bm::eddsa_pubkey_size] { 0x00 };
+            std::memcpy(preset_pubkey, tu::pubkey, bm::eddsa_pubkey_size);
+            uint8_t attestation_result[1] { 0xF };
 
             std::chrono::microseconds _bm_res;
 
-            attest::benchmark_attest_kernel
+            verify::benchmark_verify_kernel
             (
                 &_bm_res,
                 device,
@@ -71,12 +76,18 @@ SCENARIO( "the asymmetric attest kernel computes valid attestations" )
                 tu::number_execs,
                 // optional params- currently only used for testing
                 preset_msg_hash,
+                preset_attestation_result,
+                preset_pubkey,
                 attestation_result
             );
 
             THEN( "we expect the generated signature to match the pre-computed signature" )
             {
-                REQUIRE( std::equal(tu::expected_signature, tu::expected_signature + bm::eddsa_signature_size, attestation_result) );
+                // TODO: implement logging
+                // INFO("OUR SIG: " ); // << std::hex << tu::expected_signature);
+                // INFO ( "OUR SIG: " << tu::uint8_t_array_to_hex_string(tu::expected_signature, bm::eddsa_signature_size) );
+                // INFO ( "THEIR SIG: " << tu::uint8_t_array_to_hex_string(attestation_result, bm::eddsa_signature_size) );
+                REQUIRE( attestation_result[0] == true );
             }
 
         }
