@@ -6,5 +6,3 @@ build/
 *.log
 _x/
 .ipcache/
-
-temp/

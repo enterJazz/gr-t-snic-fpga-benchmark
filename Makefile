@@ -8,6 +8,7 @@ KERNEL_ASYM_VERIFY_NAME = ASYMMETRIC_VERIFY
 KERNEL_EMPTY_NAME = EMPTY
 
 HOST_TARGET = $(BUILD_DIR)/host.exe
+TEST_TARGET = $(BUILD_DIR)/test.out
 
 # base src dir
 BUILD_DIR := ./build
@@ -43,6 +44,9 @@ HOST_SRC_DIR := $(SRC_DIR)/host
 HOST_SRC_COMMON_DIR := $(HOST_SRC_DIR)/common
 HOST_SRC_BENCHMARK_DIR := $(HOST_SRC_DIR)/benchmark
 
+# test srcs
+TEST_SRC_DIR := ./test
+
 KERNEL_SYM_SRC_DIR := $(SRC_DIR)/kernel-sym
 KERNEL_ASYM_SRC_DIR := $(SRC_DIR)/kernel-asym
 
@@ -64,6 +68,15 @@ KERNEL_ASYM_MONOCYPHER_OPTIONAL_DIR := $(KERNEL_ASYM_DEPS_DIR)/monocypher-4.0.1/
 # The shell will incorrectly expand these otherwise,
 # but we want to send the * directly to the find command.
 HOST_SRCS := $(shell find $(HOST_SRC_DIR) -name '*.cpp' -or -name '*.c' -or -name '*.s')
+
+# test resources
+TEST_DEPS_DIRS := $(KERNEL_ASYM_MONOCYPHER_DIR) $(KERNEL_ASYM_MONOCYPHER_OPTIONAL_DIR)
+TEST_DEPS_SRCS := $(shell find $(TEST_DEPS_DIRS) -name '*.cpp' -or -name '*.c' -or -name '*.s')
+TEST_SRCS := $(shell find $(TEST_SRC_DIR) -name '*.cpp' -or -name '*.c' -or -name '*.s')  $(shell printf '$(HOST_SRCS)' | sed 's/\.\/src\/host\/main.cpp//' ) $(TEST_DEPS_SRCS)
+
+# test includes
+TEST_INC_DIRS := $(shell find $(TEST_DEPS_DIRS) $(TEST_SRC_DIR) $(HOST_SRC_DIR) -type d) $(TEST_SRC_DIR)
+TEST_INC_FLAGS := $(addprefix -I,$(TEST_INC_DIRS))
 
 KERNEL_SYM_DEPS_SRCS := $(shell find $(KERNEL_SYM_DEPS_DIR) $(KERNEL_SYM_COMMON_DIR) -name '*.cpp' -or -name '*.c')
 KERNEL_SYM_ATTEST_SRCS := $(KERNEL_SYM_SRC_DIR)/attest.cpp $(KERNEL_SYM_DEPS_SRCS)
@@ -102,7 +115,7 @@ KERNEL_ASYM_LD_FLAGS = -I$(KERNEL_ASYM_SRC_DIR) -I$(KERNEL_ASYM_MONOCYPHER_DIR) 
 
 
 # variable args
-NUM_BENCHMARK_ITERATIONS = 10000
+NUM_BENCHMARK_ITERATIONS = 1
 
 ## execution
 HOST_EXEC_KERNEL_ATTEST_SYM_ARGS := -k $(KERNEL_SYM_ATTEST_NAME) -x $(KERNEL_SYM_ATTEST_XCLBIN) -n $(NUM_BENCHMARK_ITERATIONS)
@@ -209,7 +222,7 @@ run-asym-attest-benchmark:
 ifeq ($(COMPILE_TARGET), hw)
 	$(HOST_TARGET) $(HOST_EXEC_KERNEL_ATTEST_ASYM_ARGS)
 else
-	$(HOST_TARGET) $(HOST_EXEC_KERNEL_ATTEST_ASYM_ARGS)
+	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(HOST_TARGET) $(HOST_EXEC_KERNEL_ATTEST_ASYM_ARGS)
 endif
 
 run-asym-verify-benchmark:
@@ -248,6 +261,16 @@ check-kernel-sym-attest:
 
 check-kernel-sym-verify:
 	$(CPP) $(CPP_FLAGS) $(KERNEL_SYM_LD_FLAGS) $(KERNEL_SYM_VERIFY_SRCS) -o $(KERNEL_SYM_VERIFY_DEBUG_TARGET)
+
+
+
+# tests
+test-asym-attest:
+	// FIXME
+	# $(CPP)  $(HOST_LD_FLAGS) $(TEST_INC_FLAGS) $(CPP_FLAGS) $(TEST_SRCS) -o $(TEST_TARGET)
+	# g++ -g -std=c++17 -I$XILINX_XRT/include -L$XILINX_XRT/lib -o build/test.exe build/catch_main.o test/test_utils.cpp src/host/common/kernel.cpp ./test/asym/attest.cpp -lxrt_coreutil -pthread -I ./test -I ./test/catch2 -I ./src/host/common -I ./src/host/benchmark
+	g++ -g -std=c++17 -I$XILINX_XRT/include -L$XILINX_XRT/lib -o build/test.exe build/catch_main.o test/test_utils.cpp src/host/common/kernel.cpp ./test/asym/attest.cpp ./src/host/benchmark/attest.cpp ./src/host/benchmark/utils.cpp -lxrt_coreutil -pthread -I ./test -I ./test/catch2 -I ./src/host/common -I ./src/host/benchmark
+	XCL_EMULATION_MODE=sw_emu KERNEL_ASYM_ATTEST_XCLBIN=./build/ASYMMETRIC_VERIFY.xclbin  ./build/test.exe
 
 clean:
 	rm -rf $(BUILD_DIR)
