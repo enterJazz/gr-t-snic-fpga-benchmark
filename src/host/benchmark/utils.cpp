@@ -80,9 +80,9 @@ namespace benchmark::utils
         else
         {
             std::copy(
-                target,
-                target + copy_range,
-                source
+                source,
+                source + copy_range,
+                target
             );
         }
     }

@@ -68,7 +68,8 @@ namespace benchmark::attest
         {
             // synchronize output device global memory to buffer data
             bo_out.sync(XCL_BO_SYNC_BO_TO_DEVICE);
-            std::copy(attestation_result, attestation_result + output_attestation_size, bo1_map);
+            std::copy(bo1_map, bo1_map + output_attestation_size, attestation_result);
+
         }
     }
 }
