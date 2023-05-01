@@ -288,7 +288,7 @@ test-asym-attest: $(TEST_SRC_MAIN_OBJ)
 	# XCL_EMULATION_MODE=sw_emu KERNEL_ASYM_ATTEST_XCLBIN=./build/ASYMMETRIC_ATTEST.xclbin  ./build/test.exe
 
 test-asym-verify: $(TEST_SRC_MAIN_OBJ)
-	g++ -g -std=c++17 -I$(XILINX_XRT)/include -L$(XILINX_XRT)/lib -o build/test.exe build/catch_main.o test/test_utils.cpp src/host/common/kernel.cpp ./test/asym/verify.cpp ./src/host/benchmark/verify.cpp ./src/host/benchmark/verify.cpp ./src/host/benchmark/utils.cpp -lxrt_coreutil -pthread -I ./test -I ./test/catch2 -I ./src/host/common -I ./src/host/benchmark
+	g++ -g -std=c++17 -I$(XILINX_XRT)/include -L$(XILINX_XRT)/lib -o build/test.exe build/catch_main.o test/test_utils.cpp src/host/common/kernel.cpp ./test/asym/verify.cpp ./src/host/benchmark/verify.cpp ./src/host/benchmark/utils.cpp -lxrt_coreutil -pthread -I ./test -I ./test/catch2 -I ./src/host/common -I ./src/host/benchmark
 	XCL_EMULATION_MODE=sw_emu KERNEL_ASYM_ATTEST_XCLBIN=./build/ASYMMETRIC_VERIFY.xclbin  ./build/test.exe
 
 clean:
