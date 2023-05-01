@@ -63,7 +63,7 @@ SCENARIO( "the asymmetric verify kernel distinguised in-/valid attestations" )
             std::memcpy(preset_attestation_result, tu::expected_signature, bm::eddsa_signature_size);
             uint8_t preset_pubkey[bm::eddsa_pubkey_size] { 0x00 };
             std::memcpy(preset_pubkey, tu::pubkey, bm::eddsa_pubkey_size);
-            uint8_t attestation_result[1] { 0xF };
+            uint8_t attestation_result[1] { 0x0 };
 
             std::chrono::microseconds _bm_res;
 
@@ -83,15 +83,45 @@ SCENARIO( "the asymmetric verify kernel distinguised in-/valid attestations" )
 
             THEN( "we expect the generated signature to match the pre-computed signature" )
             {
-                // TODO: implement logging
-                // INFO("OUR SIG: " ); // << std::hex << tu::expected_signature);
-                // INFO ( "OUR SIG: " << tu::uint8_t_array_to_hex_string(tu::expected_signature, bm::eddsa_signature_size) );
-                // INFO ( "THEIR SIG: " << tu::uint8_t_array_to_hex_string(attestation_result, bm::eddsa_signature_size) );
                 REQUIRE( attestation_result[0] == true );
             }
 
         }
 
-    }
+        WHEN( "we execute the kernel with a false signature" )
+        {
+            // prepare inputs
+            // copy as source is const
+            uint8_t preset_msg_hash[bm::input_msg_hash_size] { 0x00 };
+            std::memcpy(preset_msg_hash, tu::msg_hash, bm::input_msg_hash_size);
 
+            // preset_attestation_result is only 0s (incorrect)
+            uint8_t preset_attestation_result[bm::eddsa_signature_size] { 0x00 };
+
+            uint8_t preset_pubkey[bm::eddsa_pubkey_size] { 0x00 };
+            std::memcpy(preset_pubkey, tu::pubkey, bm::eddsa_pubkey_size);
+            uint8_t attestation_result[1] { 0x0 };
+
+            std::chrono::microseconds _bm_res;
+
+            verify::benchmark_verify_kernel
+            (
+                &_bm_res,
+                device,
+                krnl,
+                asym_kernel_type,   // sym / asym have different inputs
+                tu::number_execs,
+                // optional params- currently only used for testing
+                preset_msg_hash,
+                preset_attestation_result,
+                preset_pubkey,
+                attestation_result
+            );
+
+            THEN( "we expect to get a failed attestation result" )
+            {
+                REQUIRE( attestation_result[0] == false );
+            }
+        }
+    }
 }

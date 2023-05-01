@@ -10,7 +10,7 @@ extern "C" {
     using namespace common::asym;
 
     uint32_t counter { 0 };
-    const uint8_t signature_legit { 0 };
+    const int signature_legit { 0 };
     void ASYMMETRIC_VERIFY(
             uint8_t in_msg_hash[msg_hash_len],   // Read-Only Vector
             uint8_t in_msg_attestation[attestation_len],   // Read-Only Vector
@@ -36,7 +36,7 @@ extern "C" {
             counter
         );
 
-        uint8_t result = crypto_eddsa_check
+        int result = crypto_eddsa_check
         (
             in_msg_attestation,
             in_pub_key,

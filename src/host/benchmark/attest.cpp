@@ -62,8 +62,6 @@ namespace benchmark::attest
         // bring run into stopped state
         run.wait();
 
-        utils::benchmark_kernel_execution(result, run, benchmark_execution_iterations);
-
         if (attestation_result)
         {
             // synchronize output device global memory to buffer data
@@ -71,6 +69,9 @@ namespace benchmark::attest
             std::copy(bo1_map, bo1_map + output_attestation_size, attestation_result);
 
         }
+
+        // perform actual benchmarking
+        utils::benchmark_kernel_execution(result, run, benchmark_execution_iterations);
     }
 }
 

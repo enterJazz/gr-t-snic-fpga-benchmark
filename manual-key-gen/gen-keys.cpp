@@ -71,8 +71,9 @@ int main() {
     // shamelessly copied from ../src/kernel/asym/attest.cpp
     uint8_t counter_byte_array[4] { 0x0 };
     uint8_t sign_input_array[36] { 0x0 };
-    uint8_t counter { 1 } ;
+    uint8_t counter { 0 } ;
 
+    std::cout << "\n\nSIG w/ COUNTER = 0\n" << std::endl;
     prepare_signature_input
     (
         sign_input_array,
@@ -89,6 +90,24 @@ int main() {
     }
 
     std::cout << std::endl;
+
+    std::cout << "\n\nSIG w/ COUNTER = 1\n" << std::endl;
+    counter = 1;
+    prepare_signature_input
+    (
+        sign_input_array,
+        msg_hash,
+        counter_byte_array,
+        counter
+    );
+
+    crypto_eddsa_sign(signature, private_key, sign_input_array, 36);
+
+    for (int i = 0; i<64; i++) {
+        // std::cout << std::hex << std::setfill(' << std::endl;
+        printf("0x%x, ", signature[i]);
+    }
+
 }
 
 }

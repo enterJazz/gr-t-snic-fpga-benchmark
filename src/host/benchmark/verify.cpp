@@ -69,8 +69,6 @@ namespace benchmark::verify
         auto bo_in_pubkey_map = bo_in_pubkey.map<uint8_t*>();
         auto bo_out_map = bo_out.map<uint8_t*>();
 
-        // TODO: DRY, do as func
-
         utils::copy_else_fill(bo_in_msg_hash_map, input_msg_hash_size, preset_msg_hash);
         utils::copy_else_fill(bo_in_attestation_map, output_attestation_size, preset_msg_attestation);
         utils::copy_else_fill(bo_in_pubkey_map, eddsa_pubkey_size, preset_pubkey);
@@ -91,15 +89,16 @@ namespace benchmark::verify
         // bring run into stopped state
         run.wait();
 
-        utils::benchmark_kernel_execution(result, run, benchmark_execution_iterations);
-       
         if (attestation_result)
         {
             // synchronize output device global memory to buffer data
             bo_out.sync(XCL_BO_SYNC_BO_TO_DEVICE);
             // only copy a bool
-            std::copy(bo_out_map, bo_out_map, attestation_result);
+            std::copy(bo_out_map, bo_out_map + 1, attestation_result);
         }
+
+        // perform actual benchmarking
+        utils::benchmark_kernel_execution(result, run, benchmark_execution_iterations);
     }
 }
 
