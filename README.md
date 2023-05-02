@@ -1,4 +1,4 @@
-# GR-t-snic-fpga-benchmark
+-# GR-t-snic-fpga-benchmark
 
 ## Important Notes
 - asym is the only mode that is tested (sym is no longer relevant)
@@ -10,3 +10,14 @@ for additional commands, see the makefile itself
 
 function APIs are based off of:
 LEVIN, Dave, et al. TrInc: Small Trusted Hardware for Large Distributed Systems. In: NSDI. 2009. S. 1-14.
+
+requires the following set up on the host:
+
+host needs:
+- vitis installation
+- XRT installation
+
+FPGA needs:
+- up-to-date shell installation
+
+programmed for Xilinx Vitis v2022.2
