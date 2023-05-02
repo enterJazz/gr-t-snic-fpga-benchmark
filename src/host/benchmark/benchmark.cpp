@@ -65,7 +65,7 @@ namespace benchmark
 
         std::chrono::microseconds result;
 
-        if (target_kernel == kernel::symmetric_attest || target_kernel == kernel::asymmetric_attest)
+        if (target_kernel == kernel::symmetric_attest || target_kernel == kernel::asymmetric_attest || target_kernel == kernel::xf_asymmetric_attest)
         {
             attest::benchmark_attest_kernel(&result, device, krnl, target_kernel, benchmark_execution_iterations);
         }

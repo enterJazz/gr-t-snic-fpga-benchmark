@@ -17,6 +17,7 @@ namespace kernel
         symmetric_verify,
         asymmetric_attest,
         asymmetric_verify,
+        xf_asymmetric_attest,
         empty
     };
 

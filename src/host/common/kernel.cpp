@@ -10,6 +10,7 @@ const std::string symmetric_attest_str { "SYMMETRIC_ATTEST" };
 const std::string symmetric_verify_str { "SYMMETRIC_VERIFY" };
 const std::string asymmetric_attest_str { "ASYMMETRIC_ATTEST" };
 const std::string asymmetric_verify_str { "ASYMMETRIC_VERIFY" };
+const std::string xf_asymmetric_attest_str { "XF_ASYMMETRIC_ATTEST" };
 const std::string empty_str { "EMPTY" };
 
 
@@ -22,11 +23,12 @@ namespace kernel
     {
         switch(kernel)
         {
-            case symmetric_attest:  return symmetric_attest_str;
-            case symmetric_verify:  return symmetric_verify_str;
-            case asymmetric_attest: return asymmetric_attest_str;
-            case asymmetric_verify: return asymmetric_verify_str;
-            case empty:             return empty_str;
+            case symmetric_attest:     return symmetric_attest_str;
+            case symmetric_verify:     return symmetric_verify_str;
+            case asymmetric_attest:    return asymmetric_attest_str;
+            case asymmetric_verify:    return asymmetric_verify_str;
+            case xf_asymmetric_attest: return xf_asymmetric_attest_str;
+            case empty:                return empty_str;
             default:
                 std::cerr << "given kernel enum: " << kernel << " is invalid.\n";
                 std::exit(EXIT_FAILURE);
@@ -58,6 +60,10 @@ namespace kernel
         else if (kernel_string == asymmetric_verify_str)
         {
             return asymmetric_verify;
+        }
+        else if (kernel_string == xf_asymmetric_attest_str)
+        {
+            return xf_asymmetric_attest;
         }
         else if (kernel_string == empty_str)
         {
