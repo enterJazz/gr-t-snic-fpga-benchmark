@@ -1,4 +1,4 @@
--# GR-t-snic-fpga-benchmark
+# GR-t-snic-fpga-benchmark
 
 ## Important Notes
 - asym is the only mode that is tested (sym is no longer relevant)
