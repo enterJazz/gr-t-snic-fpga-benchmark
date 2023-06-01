@@ -86,7 +86,7 @@ CFGUTIL = emconfigutil
 # target platform of the FPGA
 TARGET_PLATFORM = xilinx_u280_gen3x16_xdma_1_202211_1
 # compile target of VC [sw_emu|hw_emu|hw]
-COMPILE_TARGET = sw_emu
+COMPILE_TARGET = hw
 
 # CFLAGS = -Ideps -Wall
 CPP_FLAGS = -g -std=c++17 -Wall
@@ -136,7 +136,7 @@ platform_config:
 kernel: kernel-attest kernel-verify kernel-empty
 
 kernel-empty: $(KERNEL_EMPTY_SRCS)
-	$(VC)  --kernel $(KERNEL_EMPTY_NAME) --compile $(KERNEL_VC_FLAGS) $(KERNEL_ASYM_LD_FLAGS) $(KERNEL_EMPTY_SRCS) -o $(KERNEL_EMPTY_OBJ)
+	$(VC)  --kernel $(KERNEL_EMPTY_NAME) --compile $(KERNEL_VC_FLAGS) $(KERNEL_EMPTY_SRCS) -o $(KERNEL_EMPTY_OBJ)
 
 kernel-attest: $(KERNEL_ASYM_ATTEST_SRCS)
 	$(VC)  --kernel $(KERNEL_ASYM_ATTEST_NAME) --compile $(KERNEL_VC_FLAGS) $(KERNEL_ASYM_LD_FLAGS) $(KERNEL_ASYM_ATTEST_SRCS) -o $(KERNEL_ASYM_ATTEST_OBJ)
