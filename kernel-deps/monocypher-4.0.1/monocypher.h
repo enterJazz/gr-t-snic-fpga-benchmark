@@ -63,31 +63,6 @@ namespace MONOCYPHER_CPP_NAMESPACE {
 extern "C" {
 #endif
 
-// Constant time comparisons
-// -------------------------
-
-// Return 0 if a and b are equal, -1 otherwise
-int crypto_verify16(const uint8_t a[16], const uint8_t b[16]);
-int crypto_verify32(const uint8_t a[32], const uint8_t b[32]);
-int crypto_verify64(const uint8_t a[64], const uint8_t b[64]);
-
-
-// Erase sensitive data
-// --------------------
-void crypto_wipe(void *secret, size_t size);
-
-
-
-// General purpose hash (BLAKE2b)
-// ------------------------------
-
-// Direct interface
-void crypto_blake2b(uint8_t *hash,          size_t hash_size,
-                    const uint8_t *message, size_t message_size);
-
-void crypto_blake2b_keyed(uint8_t *hash,          size_t hash_size,
-                          const uint8_t *key,     size_t key_size,
-                          const uint8_t *message, size_t message_size);
 
 // Incremental interface
 typedef struct {
@@ -123,22 +98,6 @@ void crypto_eddsa_sign(uint8_t        signature [64],
 int crypto_eddsa_check(const uint8_t  signature [64],
                        const uint8_t  public_key[32],
                        const uint8_t *message, size_t message_size);
-
-// Conversion to X25519
-void crypto_eddsa_to_x25519(uint8_t x25519[32], const uint8_t eddsa[32]);
-
-// EdDSA building blocks
-void crypto_eddsa_trim_scalar(uint8_t out[32], const uint8_t in[32]);
-void crypto_eddsa_reduce(uint8_t reduced[32], const uint8_t expanded[64]);
-void crypto_eddsa_mul_add(uint8_t r[32],
-                          const uint8_t a[32],
-                          const uint8_t b[32],
-                          const uint8_t c[32]);
-void crypto_eddsa_scalarbase(uint8_t point[32], const uint8_t scalar[32]);
-int crypto_eddsa_check_equation(const uint8_t signature[64],
-                                const uint8_t public_key[32],
-                                const uint8_t h_ram[32]);
-
 
 #ifdef __cplusplus
 }

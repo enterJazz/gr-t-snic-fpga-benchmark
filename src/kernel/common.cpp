@@ -3,10 +3,7 @@ extern "C"
 {
 #include "common.h"
 
-#include <monocypher.h>
-
 #include <stdint.h> // uint8_t
-#include <cstring>  // memcpy
 
     namespace common::asym
     {
@@ -18,12 +15,24 @@ extern "C"
             uint32_t counter
         )
         {
-            // store counter as byte repr to give as input to signature
-            std::memcpy(counter_byte_array, &counter, counter_len);
+            uint8_t counter_bytes[counter_len] { 0x0 };
+
+            // populate input w/ counter (as bytes)
+            // transform counter to byte array via shifts
+            counter_bytes[0] = (counter >> 24) & 0xFF;
+            counter_bytes[1] = (counter >> 16) & 0xFF;
+            counter_bytes[2] = (counter >> 8) & 0xFF;
+            counter_bytes[3] = counter & 0xFF;
             
             // concat arrays
-            std::memcpy(out_input, msg_hash, msg_hash_len);
-            std::memcpy(out_input + msg_hash_len, counter_byte_array, counter_len);
+            for (uint8_t i = 0; i < counter_len; i++)
+            {
+                out_input[i] = counter_bytes[i];
+            }
+            for (uint8_t i = counter_len; i < sign_input_len; i++)
+            {
+                out_input[i] = msg_hash[i];       
+            }
         }
     }
 }

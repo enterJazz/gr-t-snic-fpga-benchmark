@@ -1707,79 +1707,7 @@ int crypto_eddsa_check(const u8  signature[64], const u8 public_key[32],
 	return crypto_eddsa_check_equation(signature, public_key, h);
 }
 
-/////////////////////////
-/// EdDSA <--> X25519 ///
-/////////////////////////
-void crypto_eddsa_to_x25519(u8 x25519[32], const u8 eddsa[32])
-{
-	// (u, v) = ((1+y)/(1-y), sqrt(-486664)*u/x)
-	// Only converting y to u, the sign of x is ignored.
-	fe t1, t2;
-	fe_frombytes(t2, eddsa);
-	fe_add(t1, fe_one, t2);
-	fe_sub(t2, fe_one, t2);
-	fe_invert(t2, t2);
-	fe_mul(t1, t1, t2);
-	fe_tobytes(x25519, t1);
-	WIPE_BUFFER(t1);
-	WIPE_BUFFER(t2);
-}
 
-
-
-///////////////////////
-/// Scalar division ///
-///////////////////////
-
-// Montgomery reduction.
-// Divides x by (2^256), and reduces the result modulo L
-//
-// Precondition:
-//   x < L * 2^256
-// Constants:
-//   r = 2^256                 (makes division by r trivial)
-//   k = (r * (1/r) - 1) // L  (1/r is computed modulo L   )
-// Algorithm:
-//   s = (x * k) % r
-//   t = x + s*L      (t is always a multiple of r)
-//   u = (t/r) % L    (u is always below 2*L, conditional subtraction is enough)
-static void redc(u32 u[8], u32 x[16])
-{
-	static const u32 k[8] = {
-		0x12547e1b, 0xd2b51da3, 0xfdba84ff, 0xb1a206f2,
-		0xffa36bea, 0x14e75438, 0x6fe91836, 0x9db6c6f2,
-	};
-
-	// s = x * k (modulo 2^256)
-	// This is cheaper than the full multiplication.
-	u32 s[8] = {0};
-	FOR (i, 0, 8) {
-		u64 carry = 0;
-		FOR (j, 0, 8-i) {
-			carry  += s[i+j] + (u64)x[i] * k[j];
-			s[i+j]  = (u32)carry;
-			carry >>= 32;
-		}
-	}
-	u32 t[16] = {0};
-	multiply(t, s, L);
-
-	// t = t + x
-	u64 carry = 0;
-	FOR (i, 0, 16) {
-		carry  += (u64)t[i] + x[i];
-		t[i]    = (u32)carry;
-		carry >>= 32;
-	}
-
-	// u = (t / 2^256) % L
-	// Note that t / 2^256 is always below 2*L,
-	// So a constant time conditional subtraction is enough
-	remove_l(u, t+8);
-
-	WIPE_BUFFER(s);
-	WIPE_BUFFER(t);
-}
 
 
 

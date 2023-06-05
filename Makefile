@@ -47,7 +47,6 @@ KERNEL_ASYM_SRC_DIR := $(SRC_DIR)/kernel
 # https://monocypher.org
 KERNEL_ASYM_DEPS_DIR := ./kernel-deps
 KERNEL_ASYM_MONOCYPHER_DIR := $(KERNEL_ASYM_DEPS_DIR)/monocypher-4.0.1
-KERNEL_ASYM_MONOCYPHER_OPTIONAL_DIR := $(KERNEL_ASYM_DEPS_DIR)/monocypher-4.0.1/optional
 
 # Find all the C and C++ files we want to compile
 # Note the single quotes around the * expressions.
@@ -93,7 +92,7 @@ CPP_FLAGS = -g -std=c++17 -Wall
 HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -I$(HOST_SRC_DIR) -I$(HOST_SRC_COMMON_DIR) -I$(HOST_SRC_BENCHMARK_DIR) -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread -O0
 
 KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
-KERNEL_ASYM_LD_FLAGS = -I$(KERNEL_ASYM_SRC_DIR) -I$(KERNEL_ASYM_MONOCYPHER_DIR) -I$(KERNEL_ASYM_MONOCYPHER_OPTIONAL_DIR)
+KERNEL_ASYM_LD_FLAGS = -I$(KERNEL_ASYM_SRC_DIR) -I$(KERNEL_ASYM_MONOCYPHER_DIR)
 
 
 # variable args
