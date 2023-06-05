@@ -51,7 +51,7 @@ namespace benchmark
     {
 
         // access FPGA
-        auto device = xrt::device(device_index);
+        auto device = xrt::device("0000:17:00.1");
         auto uuid = device.load_xclbin(kernel_xlcbin_path);
 
         auto krnl = xrt::kernel

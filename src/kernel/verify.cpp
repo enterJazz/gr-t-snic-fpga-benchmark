@@ -57,25 +57,3 @@ extern "C" {
 }
 
 
-#ifdef _DEBUG_KERNEL_BUILD
-#include <stdio.h>
-int
-main() {    
-    uint8_t in_data[INPUT_MSG_HASH_LEN] = { 0xFF };
-    uint8_t in_msg_hmac[HMAC_SHA256_DIGEST_SIZE] = { 0x00 };
-    bool out_result;
-    verify(
-        in_data,
-        in_msg_hmac,
-        out_result
-    );
-    
-    if (out_result) {
-        printf("HMACs match\n");
-    } else {
-        printf("HMACs DO NOT match\n");
-    }
-
-}
-#endif
-
