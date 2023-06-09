@@ -42,7 +42,7 @@ extern "C" {
             sign_input_array,
             sign_input_len,
             CONTEXT,
-            in_pub_key
+            pubkey
         );
 
         if (result == signature_legit)

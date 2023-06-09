@@ -40,7 +40,7 @@ TEST_SRC_DIR := ./test
 TEST_SRC_MAIN := $(TEST_SRC_DIR)/catch_main.cpp
 TEST_SRC_MAIN_OBJ := $(BUILD_DIR)/catch_main.o
 
-KERNEL_ASYM_SRC_DIR := $(SRC_DIR)/kernel
+KERNEL_ASYM_SRC_DIR := $(SRC_DIR)/libhydro-kernel
 
 # for asym
 # for public key crypto
@@ -66,7 +66,7 @@ TEST_LD_FLAGS := -lxrt_coreutil -pthread -L$(XILINX_XRT)/lib -I$(XILINX_XRT)/inc
 
 KERNEL_EMPTY_SRCS := $(KERNEL_ASYM_SRC_DIR)/empty.cpp
 
-KERNEL_ASYM_DEPS_SRCS := $(shell find $(KERNEL_ASYM_DEPS_DIR) -name '*.cpp' -or -name '*.c')
+KERNEL_ASYM_DEPS_SRCS := ./kernel-deps/libhydrogen/hydrogen.c
 KERNEL_ASYM_COMMON_SRC := $(KERNEL_ASYM_SRC_DIR)/common.cpp
 KERNEL_ASYM_ATTEST_SRCS := $(KERNEL_ASYM_SRC_DIR)/attest.cpp $(KERNEL_ASYM_DEPS_SRCS) $(KERNEL_ASYM_COMMON_SRC)
 KERNEL_ASYM_VERIFY_SRCS := $(KERNEL_ASYM_SRC_DIR)/verify.cpp $(KERNEL_ASYM_DEPS_SRCS) $(KERNEL_ASYM_COMMON_SRC)
@@ -92,7 +92,7 @@ CPP_FLAGS = -g -std=c++17 -Wall
 HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -I$(HOST_SRC_DIR) -I$(HOST_SRC_COMMON_DIR) -I$(HOST_SRC_BENCHMARK_DIR) -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread -O0
 
 KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
-KERNEL_ASYM_LD_FLAGS = -I$(KERNEL_ASYM_SRC_DIR) -I$(KERNEL_ASYM_MONOCYPHER_DIR)
+KERNEL_ASYM_LD_FLAGS = -I$(KERNEL_ASYM_SRC_DIR) -I./kernel-deps/libhydrogen
 
 
 # variable args
