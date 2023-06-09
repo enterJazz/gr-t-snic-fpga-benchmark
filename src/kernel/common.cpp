@@ -23,7 +23,7 @@ extern "C"
             counter_bytes[1] = (counter >> 16) & 0xFF;
             counter_bytes[2] = (counter >> 8) & 0xFF;
             counter_bytes[3] = counter & 0xFF;
-            
+
             // concat arrays
             for (uint8_t i = 0; i < counter_len; i++)
             {

@@ -5,7 +5,7 @@ extern "C"
 {
 #include "common.h"
 
-#include <monocypher.h>
+#include <hydrogen.h>
 #include <stdint.h> // uint8_t, uint32_t
 
     using namespace common::asym;
@@ -21,7 +21,7 @@ extern "C"
 #pragma HLS INTERFACE m_axi port=out_attestation bundle=aximm1
 
         // TODO: only generate pub, priv keys once - via static
-
+        
         // store counter as byte repr to give as input to signature
         uint8_t counter_byte_array[counter_len] { 0x0 };
         // concat arrays
@@ -36,12 +36,13 @@ extern "C"
             counter
         );
 
-        crypto_eddsa_sign
+        hydro_sign_create
         (
             out_attestation,
-            privkey,
             sign_input_array,
-            sign_input_len
+            sign_input_len,
+            CONTEXT,
+            privkey
         );
 
         counter++;
