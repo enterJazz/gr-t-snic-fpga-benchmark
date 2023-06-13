@@ -5,8 +5,9 @@ extern "C"
 {
 #include "common.h"
 
-#include <monocypher.h>
+#include <tweetnacl.h>
 #include <stdint.h> // uint8_t, uint32_t
+#include <cstring>  // memcpy
 
     using namespace common::asym;
 
@@ -20,13 +21,12 @@ extern "C"
 #pragma HLS INTERFACE m_axi port=in_msg_hash bundle=aximm1
 #pragma HLS INTERFACE m_axi port=out_attestation bundle=aximm1
 
-        // TODO: only generate pub, priv keys once - via static
-
         // store counter as byte repr to give as input to signature
         uint8_t counter_byte_array[counter_len] { 0x0 };
         // concat arrays
         uint8_t sign_input_array[sign_input_len] { 0x0 };
 
+        uint8_t signed_message[sign_input_len + attestation_len] { 0x0 };
 
         prepare_signature_input
         (
@@ -36,13 +36,20 @@ extern "C"
             counter
         );
 
-        crypto_eddsa_sign
-        (
-            out_attestation,
-            privkey,
-            sign_input_array,
-            sign_input_len
-        );
+//        crypto_eddsa_sign
+//        (
+//            out_attestation,
+//            privkey,
+//            sign_input_array,
+//            sign_input_len
+//        );
+//
+
+        unsigned long long _signed_message_len;
+
+        crypto_sign(signed_message, &_signed_message_len, sign_input_array, 36, privkey);
+
+        std::memcpy(out_attestation, &signed_message[sign_input_len], attestation_len);
 
         counter++;
     }

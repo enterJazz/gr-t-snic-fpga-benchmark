@@ -40,13 +40,11 @@ TEST_SRC_DIR := ./test
 TEST_SRC_MAIN := $(TEST_SRC_DIR)/catch_main.cpp
 TEST_SRC_MAIN_OBJ := $(BUILD_DIR)/catch_main.o
 
-KERNEL_ASYM_SRC_DIR := $(SRC_DIR)/libhydro-kernel
+KERNEL_ASYM_SRC_DIR := $(SRC_DIR)/kernel
 
 # for asym
 # for public key crypto
-# https://monocypher.org
 KERNEL_ASYM_DEPS_DIR := ./kernel-deps
-KERNEL_ASYM_MONOCYPHER_DIR := $(KERNEL_ASYM_DEPS_DIR)/monocypher-4.0.1
 
 # Find all the C and C++ files we want to compile
 # Note the single quotes around the * expressions.
@@ -66,7 +64,7 @@ TEST_LD_FLAGS := -lxrt_coreutil -pthread -L$(XILINX_XRT)/lib -I$(XILINX_XRT)/inc
 
 KERNEL_EMPTY_SRCS := $(KERNEL_ASYM_SRC_DIR)/empty.cpp
 
-KERNEL_ASYM_DEPS_SRCS := ./kernel-deps/libhydrogen/hydrogen.c
+KERNEL_ASYM_DEPS_SRCS := ./kernel-deps/tweetnacl.c
 KERNEL_ASYM_COMMON_SRC := $(KERNEL_ASYM_SRC_DIR)/common.cpp
 KERNEL_ASYM_ATTEST_SRCS := $(KERNEL_ASYM_SRC_DIR)/attest.cpp $(KERNEL_ASYM_DEPS_SRCS) $(KERNEL_ASYM_COMMON_SRC)
 KERNEL_ASYM_VERIFY_SRCS := $(KERNEL_ASYM_SRC_DIR)/verify.cpp $(KERNEL_ASYM_DEPS_SRCS) $(KERNEL_ASYM_COMMON_SRC)
@@ -85,14 +83,14 @@ CFGUTIL = emconfigutil
 # target platform of the FPGA
 TARGET_PLATFORM = xilinx_u280_gen3x16_xdma_1_202211_1
 # compile target of VC [sw_emu|hw_emu|hw]
-COMPILE_TARGET = hw
+COMPILE_TARGET = sw_emu
 
 # CFLAGS = -Ideps -Wall
 CPP_FLAGS = -g -std=c++17 -Wall
 HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -I$(HOST_SRC_DIR) -I$(HOST_SRC_COMMON_DIR) -I$(HOST_SRC_BENCHMARK_DIR) -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread -O0
 
 KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
-KERNEL_ASYM_LD_FLAGS = -I$(KERNEL_ASYM_SRC_DIR) -I./kernel-deps/libhydrogen
+KERNEL_ASYM_LD_FLAGS = -I$(KERNEL_ASYM_SRC_DIR) -I./kernel-deps
 
 
 # variable args

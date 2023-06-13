@@ -2,10 +2,11 @@
 extern "C" {
 #include "common.h"
 
-#include <monocypher.h>
+#include <tweetnacl.h>
 
 #include <stdint.h>  // uint8_t, uint32_t
 #include <stdbool.h> // bool
+#include <cstring>  // memcpy
 
     using namespace common::asym;
 
@@ -36,13 +37,28 @@ extern "C" {
             counter
         );
 
-        int result = crypto_eddsa_check
-        (
-            in_msg_attestation,
-            in_pub_key,
+//        int result = crypto_eddsa_check
+//        (
+//            in_msg_attestation,
+//            in_pub_key,
+//            sign_input_array,
+//            sign_input_len
+//        );
+//
+        uint8_t signed_message[signed_message_len] { 0x0 };
+
+        std::memcpy(signed_message, sign_input_array, sign_input_len);
+        std::memcpy(&signed_message[sign_input_len], in_msg_attestation, attestation_len);
+
+
+        int result = crypto_sign_open(
             sign_input_array,
-            sign_input_len
+            (long long unsigned *) sign_input_len,
+            signed_message,
+            signed_message_len,
+            pubkey
         );
+
 
         if (result == signature_legit)
         {
