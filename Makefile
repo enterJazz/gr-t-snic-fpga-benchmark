@@ -83,7 +83,7 @@ CFGUTIL = emconfigutil
 # target platform of the FPGA
 TARGET_PLATFORM = xilinx_u280_gen3x16_xdma_1_202211_1
 # compile target of VC [sw_emu|hw_emu|hw]
-COMPILE_TARGET = sw_emu
+COMPILE_TARGET = hw
 
 # CFLAGS = -Ideps -Wall
 CPP_FLAGS = -g -std=c++17 -Wall

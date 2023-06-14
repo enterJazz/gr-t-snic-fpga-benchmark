@@ -35,7 +35,7 @@
 namespace benchmark
 {
     // FPGA device index ; required to open FPGA
-    const uint8_t device_index { 0 };
+    const uint8_t device_index { 1 };
 
     // IDEA:
     // identify shared point: in kernel::run
