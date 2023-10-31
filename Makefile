@@ -3,6 +3,7 @@ KERNEL_ASYM_ATTEST_NAME = ASYMMETRIC_ATTEST
 KERNEL_ASYM_VERIFY_NAME = ASYMMETRIC_VERIFY
 
 KERNEL_EMPTY_NAME = EMPTY
+KERNEL_RSA_NAME = RSA
 
 HOST_TARGET = $(BUILD_DIR)/host.exe
 TEST_TARGET = $(BUILD_DIR)/test.out
@@ -13,16 +14,18 @@ SRC_DIR := ./src
 
 
 KERNEL_EMPTY_OBJ = $(BUILD_DIR)/$(KERNEL_EMPTY_NAME).xo
+KERNEL_RSA_OBJ = $(BUILD_DIR)/$(KERNEL_RSA_NAME).xo
 
 KERNEL_ASYM_ATTEST_OBJ = $(BUILD_DIR)/$(KERNEL_ASYM_ATTEST_NAME).xo
 KERNEL_ASYM_VERIFY_OBJ = $(BUILD_DIR)/$(KERNEL_ASYM_VERIFY_NAME).xo
 KERNEL_ASYM_EMPTY_OBJ = $(BUILD_DIR)/$(KERNEL_EMPTY_NAME).xo
-KERNEL_ASYM_OBJS := $(KERNEL_ASYM_ATTEST_OBJ) $(KERNEL_ASYM_VERIFY_OBJ) $(KERNEL_ASYM_EMPTY_OBJ)
+KERNEL_ASYM_OBJS := $(KERNEL_ASYM_ATTEST_OBJ) $(KERNEL_ASYM_VERIFY_OBJ) $(KERNEL_ASYM_EMPTY_OBJ) $(KERNEL_RSA_OBJ)
 
 KERNEL_ASYM_ATTEST_XCLBIN = $(BUILD_DIR)/$(KERNEL_ASYM_ATTEST_NAME).xclbin
 KERNEL_ASYM_VERIFY_XCLBIN = $(BUILD_DIR)/$(KERNEL_ASYM_VERIFY_NAME).xclbin
 
 KERNEL_EMPTY_XCLBIN = $(BUILD_DIR)/$(KERNEL_EMPTY_NAME).xclbin
+KERNEL_RSA_XCLBIN = $(BUILD_DIR)/$(KERNEL_RSA_NAME).xclbin
 
 
 # host, kernel srcs
@@ -44,7 +47,9 @@ KERNEL_ASYM_SRC_DIR := $(SRC_DIR)/kernel
 
 # for asym
 # for public key crypto
-KERNEL_ASYM_DEPS_DIR := ./kernel-deps
+#KERNEL_ASYM_DEPS_DIR := ./kernel-deps
+KERNEL_ASYM_DEPS_DIR := $(realpath ./kernel-deps)
+KERNEL_RSA_DEPS_DIR := $(realpath ./kernel-deps)
 
 # Find all the C and C++ files we want to compile
 # Note the single quotes around the * expressions.
@@ -63,10 +68,15 @@ TEST_INC_FLAGS := $(addprefix -I,$(TEST_INC_DIRS))
 TEST_LD_FLAGS := -lxrt_coreutil -pthread -L$(XILINX_XRT)/lib -I$(XILINX_XRT)/include/
 
 KERNEL_EMPTY_SRCS := $(KERNEL_ASYM_SRC_DIR)/empty.cpp
+KERNEL_RSA_SRCS := $(KERNEL_ASYM_SRC_DIR)/rsa.cpp $(KERNEL_RSA_DEPS_DIR)/vitis_rsa.cpp $(KERNEL_RSA_DEPS_DIR)/k.cpp
 
-KERNEL_ASYM_DEPS_SRCS := ./kernel-deps/tweetnacl.c
-KERNEL_ASYM_COMMON_SRC := $(KERNEL_ASYM_SRC_DIR)/common.cpp
-KERNEL_ASYM_ATTEST_SRCS := $(KERNEL_ASYM_SRC_DIR)/attest.cpp $(KERNEL_ASYM_DEPS_SRCS) $(KERNEL_ASYM_COMMON_SRC)
+
+#KERNEL_ASYM_DEPS_SRCS := ./kernel-deps/tweetnacl.c 
+#KERNEL_ASYM_DEPS_SRCS +=  ./kernel-deps/hmac-sha256/hmac-sha256.c ./kernel-deps/sha256/sha256.c
+KERNEL_ASYM_DEPS_SRCS :=  $(KERNEL_ASYM_DEPS_DIR)/kamil-hmac/hmac_org.cpp $(KERNEL_ASYM_DEPS_DIR)/kamil-hmac/hmac.cpp  $(KERNEL_ASYM_SRC_DIR)/util.cpp
+KERNEL_ASYM_COMMON_SRC := $(KERNEL_ASYM_SRC_DIR)/common.cpp 
+KERNEL_ASYM_ATTEST_SRCS := $(KERNEL_ASYM_SRC_DIR)/attest.cpp  $(KERNEL_ASYM_COMMON_SRC) $(KERNEL_ASYM_DEPS_SRCS)
+$(info ${$(info $$var is [${var}])})
 KERNEL_ASYM_VERIFY_SRCS := $(KERNEL_ASYM_SRC_DIR)/verify.cpp $(KERNEL_ASYM_DEPS_SRCS) $(KERNEL_ASYM_COMMON_SRC)
 KERNEL_ASYM_SRCS := $(KERNEL_ASYM_ATTEST_SRCS) $(KERNEL_ASYM_VERIFY_SRCS)
 
@@ -81,20 +91,21 @@ GDB     = gdb
 CFGUTIL = emconfigutil
 
 # target platform of the FPGA
-TARGET_PLATFORM = xilinx_u280_gen3x16_xdma_1_202211_1
+TARGET_PLATFORM = xilinx_u50_gen3x16_xdma_5_202210_1 #xilinx_u280_gen3x16_xdma_1_202211_1 
 # compile target of VC [sw_emu|hw_emu|hw]
-COMPILE_TARGET = hw
+COMPILE_TARGET = hw_emu
 
 # CFLAGS = -Ideps -Wall
-CPP_FLAGS = -g -std=c++17 -Wall
-HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -I$(HOST_SRC_DIR) -I$(HOST_SRC_COMMON_DIR) -I$(HOST_SRC_BENCHMARK_DIR) -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread -O0
+CPP_FLAGS = -g -std=c++17 -Wall -I$(KERNEL_RSA_DEPS_DIR)
+HOST_LD_FLAGS = -I$(XILINX_XRT)/include/ -I$(HOST_SRC_DIR) -I$(HOST_SRC_COMMON_DIR) -I$(HOST_SRC_BENCHMARK_DIR) -L$(XILINX_XRT)/lib -lxrt_coreutil -pthread -O3
 
 KERNEL_VC_FLAGS = --target $(COMPILE_TARGET) --platform $(TARGET_PLATFORM)
-KERNEL_ASYM_LD_FLAGS = -I$(KERNEL_ASYM_SRC_DIR) -I./kernel-deps
+KERNEL_ASYM_LD_FLAGS = -I$(KERNEL_ASYM_SRC_DIR) -I./kernel-deps -I$(KERNEL_ASYM_DEPS_DIR)/kamil-hmac
+KERNEL_RSA_COMPILE_FLAGS = -I$(KERNEL_RSA_DEPS_DIR)
 
 
 # variable args
-NUM_BENCHMARK_ITERATIONS = 10000
+NUM_BENCHMARK_ITERATIONS = 100
 
 ## execution
 
@@ -102,6 +113,7 @@ HOST_EXEC_KERNEL_ASYM_ATTEST_ARGS := -k $(KERNEL_ASYM_ATTEST_NAME) -x $(KERNEL_A
 HOST_EXEC_KERNEL_ASYM_VERIFY_ARGS := -k $(KERNEL_ASYM_VERIFY_NAME) -x $(KERNEL_ASYM_VERIFY_XCLBIN) -n $(NUM_BENCHMARK_ITERATIONS)
 
 HOST_EXEC_KERNEL_EMPTY_ARGS := -k $(KERNEL_EMPTY_NAME) -x $(KERNEL_EMPTY_XCLBIN) -n $(NUM_BENCHMARK_ITERATIONS)
+HOST_EXEC_KERNEL_RSA_ARGS := -k $(KERNEL_RSA_NAME) -x $(KERNEL_RSA_XCLBIN) -n $(NUM_BENCHMARK_ITERATIONS)
 
 
 # all the source files
@@ -130,10 +142,13 @@ host: $(HOST_SRCS)
 platform_config:
 	$(CFGUTIL) --platform $(TARGET_PLATFORM) --od $(BUILD_DIR)
 
-kernel: kernel-attest kernel-verify kernel-empty
+kernel: kernel-attest kernel-verify kernel-empty kernel-rsa
 
 kernel-empty: $(KERNEL_EMPTY_SRCS)
 	$(VC)  --kernel $(KERNEL_EMPTY_NAME) --compile $(KERNEL_VC_FLAGS) $(KERNEL_EMPTY_SRCS) -o $(KERNEL_EMPTY_OBJ)
+
+kernel-rsa: $(KERNEL_RSA_SRCS)
+	$(VC)  --kernel $(KERNEL_RSA_NAME) --compile $(KERNEL_VC_FLAGS) ${KERNEL_RSA_COMPILE_FLAGS} $(KERNEL_RSA_SRCS) -o $(KERNEL_RSA_OBJ)
 
 kernel-attest: $(KERNEL_ASYM_ATTEST_SRCS)
 	$(VC)  --kernel $(KERNEL_ASYM_ATTEST_NAME) --compile $(KERNEL_VC_FLAGS) $(KERNEL_ASYM_LD_FLAGS) $(KERNEL_ASYM_ATTEST_SRCS) -o $(KERNEL_ASYM_ATTEST_OBJ)
@@ -152,6 +167,9 @@ link-verify:
 
 link-empty:
 	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_EMPTY_OBJ) -o $(KERNEL_EMPTY_XCLBIN)
+
+link-rsa:
+	$(VC) --link $(KERNEL_VC_FLAGS) $(KERNEL_RSA_OBJ) -o $(KERNEL_RSA_XCLBIN)
 
 run-attest-benchmark:
 	test -e $(HOST_TARGET)
@@ -180,6 +198,14 @@ else
 	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(HOST_TARGET) $(HOST_EXEC_KERNEL_EMPTY_ARGS)
 endif
 
+run-rsa-benchmark:
+	test -e $(HOST_TARGET)
+	# BENCHMARK RSA
+ifeq ($(COMPILE_TARGET), hw)
+	$(HOST_TARGET) $(HOST_EXEC_KERNEL_RSA_ARGS)
+else
+	XCL_EMULATION_MODE=$(COMPILE_TARGET) $(HOST_TARGET) $(HOST_EXEC_KERNEL_RSA_ARGS)
+endif
 
 debug-attest:
 	test -e $(HOST_TARGET)

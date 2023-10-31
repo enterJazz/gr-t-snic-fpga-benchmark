@@ -11,6 +11,7 @@ const std::string symmetric_verify_str { "SYMMETRIC_VERIFY" };
 const std::string asymmetric_attest_str { "ASYMMETRIC_ATTEST" };
 const std::string asymmetric_verify_str { "ASYMMETRIC_VERIFY" };
 const std::string empty_str { "EMPTY" };
+const std::string rsa_str { "RSA" };
 
 
 namespace kernel
@@ -27,6 +28,7 @@ namespace kernel
             case asymmetric_attest: return asymmetric_attest_str;
             case asymmetric_verify: return asymmetric_verify_str;
             case empty:             return empty_str;
+            case rsa:             return rsa_str;
             default:
                 std::cerr << "given kernel enum: " << kernel << " is invalid.\n";
                 std::exit(EXIT_FAILURE);
@@ -62,6 +64,10 @@ namespace kernel
         else if (kernel_string == empty_str)
         {
             return empty;
+        }
+        else if (kernel_string == rsa_str)
+        {
+            return rsa;
         }
         else
         {

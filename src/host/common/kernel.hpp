@@ -17,7 +17,8 @@ namespace kernel
         symmetric_verify,
         asymmetric_attest,
         asymmetric_verify,
-        empty
+        empty,
+	rsa
     };
 
     const std::string returnAvailableKernels();
