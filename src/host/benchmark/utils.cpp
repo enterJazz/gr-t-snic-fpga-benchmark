@@ -43,8 +43,9 @@ void benchmark_kernel_execution(std::chrono::microseconds &result,
     std::chrono::steady_clock::time_point end{std::chrono::steady_clock::now()};
     std::chrono::microseconds diff{
         std::chrono::duration_cast<std::chrono::microseconds>(end - start)};
-    std::cout << "diff= " << diff.count() << "\n";
     total_exec_dur += diff;
+    if (i_exec%100000 == 0)
+	    std::cout << "diff= " << diff.count() <<  " current_average_lat=" << ((1.0)*total_exec_dur.count())/((i_exec+1)*1.0) << "\n";
   }
 
   std::chrono::microseconds avg_exec_dur =

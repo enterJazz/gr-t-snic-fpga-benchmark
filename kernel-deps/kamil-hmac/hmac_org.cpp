@@ -3,6 +3,7 @@
 #include <ap_int.h>
 #include <hls_stream.h>
 #include <stdio.h>
+#include <iostream>
 
 #include "kamil-hmac/hmac_org.hpp"
 
@@ -1616,19 +1617,24 @@ void HMAC_SHA384(hls::stream<AXIS_DATA> &input,
   ap_uint<512> keep;
   ap_uint<6> id;
 
+std::cout <<__PRETTY_FUNCTION__ << "1\n";
   injectData(input, msg_key_strm, len_strm, key, keep, id);
+std::cout <<__PRETTY_FUNCTION__ << "2\n";
   ap_uint<384> res;
   internal::HMAC_SHA384_2in1(1, opad_buffer, first_digest, msg_key_strm,
                              len_strm, res);
+std::cout <<__PRETTY_FUNCTION__ << "3\n";
   first_digest = res;
   internal::HMAC_SHA384_2in1(2, opad_buffer, first_digest, msg_key_strm,
                              len_strm, res);
+std::cout <<__PRETTY_FUNCTION__ << "4\n";
   AXIS_DATA r;
   r.tdata = res;
   r.tlast = 1;
   r.tkeep = keep;
   r.tid = id;
   output.write(r);
+std::cout <<__PRETTY_FUNCTION__ << "5\n";
 }
 } // namespace security
 } // namespace xf
@@ -1641,5 +1647,6 @@ void hmac(hls::stream<AXIS_DATA> &input, hls::stream<AXIS_DATA> &output) {
 #pragma HLS interface axis register port = output
 #pragma HLS AGGREGATE variable = input bit
 #pragma HLS AGGREGATE variable = output bit
+std::cout <<__PRETTY_FUNCTION__ << "\n";
   AXI::xf::security::HMAC_SHA384(input, output);
 }

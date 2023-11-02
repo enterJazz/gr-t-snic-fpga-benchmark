@@ -93,7 +93,7 @@ CFGUTIL = emconfigutil
 # target platform of the FPGA
 TARGET_PLATFORM = xilinx_u50_gen3x16_xdma_5_202210_1 #xilinx_u280_gen3x16_xdma_1_202211_1 
 # compile target of VC [sw_emu|hw_emu|hw]
-COMPILE_TARGET = hw_emu
+COMPILE_TARGET = hw
 
 # CFLAGS = -Ideps -Wall
 CPP_FLAGS = -g -std=c++17 -Wall -I$(KERNEL_RSA_DEPS_DIR)
@@ -105,7 +105,7 @@ KERNEL_RSA_COMPILE_FLAGS = -I$(KERNEL_RSA_DEPS_DIR)
 
 
 # variable args
-NUM_BENCHMARK_ITERATIONS = 100
+NUM_BENCHMARK_ITERATIONS = 1000000
 
 ## execution
 
