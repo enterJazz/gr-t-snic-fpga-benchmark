@@ -32,7 +32,7 @@ void benchmark_kernel_execution(std::chrono::microseconds &result,
   // as result
   std::chrono::microseconds total_exec_dur{std::chrono::microseconds::zero()};
 
-	std::cout << __PRETTY_FUNCTION__ << "\n";
+  std::cout << __PRETTY_FUNCTION__ << "\n";
   for (size_t i_exec = 0; i_exec < benchmark_execution_iterations; i_exec++) {
     std::chrono::steady_clock::time_point start{
         std::chrono::steady_clock::now()};
@@ -44,8 +44,8 @@ void benchmark_kernel_execution(std::chrono::microseconds &result,
     std::chrono::microseconds diff{
         std::chrono::duration_cast<std::chrono::microseconds>(end - start)};
     total_exec_dur += diff;
-    if (i_exec%100000 == 0)
-	    std::cout << "diff= " << diff.count() <<  " current_average_lat=" << ((1.0)*total_exec_dur.count())/((i_exec+1)*1.0) << "\n";
+    if (i_exec%10 == 0)
+	    std::cout << "i_exec= " << i_exec << " diff= " << diff.count() <<  " current_average_lat=" << ((1.0)*total_exec_dur.count())/((i_exec+1)*1.0) << "\n";
   }
 
   std::chrono::microseconds avg_exec_dur =

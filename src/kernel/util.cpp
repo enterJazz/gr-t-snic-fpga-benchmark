@@ -45,10 +45,14 @@ void compute_msg_hmac(uint8_t out[HMAC_SHA256_DIGEST_SIZE],
   // TODO: asymmetric or symetric crypto? HMAC: symetric -> implement for now
   // due to simplicity
   // NOTE: out attestation MUST have size HMAC_SHA256_DIGEST_SIZE (32)
-  uint8_t out1[128];
-  uint8_t in_data1[128];
+  uint8_t out1[64];
+  uint8_t in_data1[64];
 
-  hmac_internal();
+  hmac_internal(in_data, out1);
+#pragma HLS loop_tripcount min = 1 max = 64
+#pragma HLS pipeline
+  for (int i = 0; i < 64; i++)
+    out[i] = out1[i];
 #if 0
 	hls::stream<AXIS_DATA> input;
 	for (auto i = 0; i < 32; i++) {

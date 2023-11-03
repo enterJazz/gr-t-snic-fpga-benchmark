@@ -1,5 +1,3 @@
-#include <stdint.h>
-
 #include <ap_axi_sdata.h>
 #include <ap_int.h>
 #include <hls_stream.h>

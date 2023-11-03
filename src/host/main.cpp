@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
   }
 
   size_t num_iterations{default_num_iterations};
+  std::cout << __PRETTY_FUNCTION__ << "\n";
   const std::string num_iterations_arg{
       input.getCmdOption(ParseOpts::num_iterations)};
   if (!num_iterations_arg.empty()) {

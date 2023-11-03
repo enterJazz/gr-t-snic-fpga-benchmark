@@ -1,11 +1,4 @@
-
-#include <ap_axi_sdata.h>
-#include <ap_int.h>
-#include <hls_stream.h>
-#include <stdio.h>
-#include <iostream>
-
-#include "kamil-hmac/hmac_org.hpp"
+#include "hmac_org.hpp"
 
 // void sha512_eddsa_verify(hls::stream<AXIS_DATA>& input,
 //		hls::stream<ap_uint<1> >& output);
@@ -185,7 +178,7 @@ LOOP_PREPROCESSING_MAIN:
         // pad 1
         b.M[0] = 0x8000000000000000UL;
 
-        // pad zero words
+      // pad zero words
       LOOP_PAD_13_ZERO_WORDS:
         for (ap_uint<5> i = 1; i < 14; ++i) {
 #pragma HLS unroll
@@ -634,6 +627,7 @@ void SHA512Digest(
       0x5fcb6fab3ad6faecUL, 0x6c44198c4a475817UL,
   };
 #pragma HLS array_partition variable = K complete
+#pragma HLS bind_storage variable = K type = ROM_1P impl = LUTRAM
 
   bool end;
 
@@ -699,7 +693,7 @@ LOOP_SHA1_DIGEST_NBLK:
       ap_uint<w> g = H[6];
       ap_uint<w> h = H[7];
 
-      // update working variables accordingly
+    // update working variables accordingly
     LOOP_SHA1_UPDATE_80_ROUNDS:
       for (ap_uint<7> t = 0; t < 80; t++) {
 #pragma HLS pipeline II = 2
@@ -1040,7 +1034,7 @@ static void preProcessingOneTripForHMAC(
 
       while (tmp_len[4] != 1) {
 
-        //    #pragma HLS pipeline II = 1
+//    #pragma HLS pipeline II = 1
 #pragma HLS unroll // kamil
 
         //#pragma HLS PERFORMANCE target_ti=1000 //KAMIL
@@ -1307,6 +1301,7 @@ void generateMsgScheduleOneTrip(hls::stream<ap_uint<64 + 1>> &blk_strm,
       0x431d67c49c100d4cUL, 0x4cc5d4becb3e42b6UL, 0x597f299cfc657e2aUL,
       0x5fcb6fab3ad6faecUL, 0x6c44198c4a475817UL,
   };
+#pragma HLS array_partition variable = K complete
 #pragma HLS bind_storage variable = K type = ROM_1P impl = LUTRAM
 
   ap_uint<64> H[8];
@@ -1585,20 +1580,20 @@ void sha512_t(
  */
 void HMAC_SHA384(hls::stream<AXIS_DATA> &input,
                  hls::stream<AXIS_DATA> &output) {
-  /**
-   * isHMAC: false -> SHA384.
-   * Message will be input by msg_key_strm, in multiple 8 bytes pack.
-   * Each pack of message will be acommpanied by 5 bits from length from
-   * len_strm. Bits[3-0] is used for pure length, ranging from 0 to 8. Bit[4] is
-   * used to identify if this is last pack, 1: last, 0: not last.
-   *
-   * isHMAC: true -> SHA384
-   * Both key and message will be input by msg_key_strm, key first, message
-   * later. Key should be multiple of 8 byte, no bigger than 128 bytes. Message
-   * is similar to SHA384.
-   *
-   * Please take reference from test cases.
-   */
+/**
+ * isHMAC: false -> SHA384.
+ * Message will be input by msg_key_strm, in multiple 8 bytes pack.
+ * Each pack of message will be acommpanied by 5 bits from length from len_strm.
+ * Bits[3-0] is used for pure length, ranging from 0 to 8. Bit[4] is used to
+ * identify if this is last pack, 1: last, 0: not last.
+ *
+ * isHMAC: true -> SHA384
+ * Both key and message will be input by msg_key_strm, key first, message later.
+ * Key should be multiple of 8 byte, no bigger than 128 bytes.
+ * Message is similar to SHA384.
+ *
+ * Please take reference from test cases.
+ */
 #pragma HLS dataflow
 #pragma HLS allocation function instances = internal::HMAC_SHA384_2in1 limit = 1
   ap_uint<64> opad_buffer[16];
@@ -1617,36 +1612,29 @@ void HMAC_SHA384(hls::stream<AXIS_DATA> &input,
   ap_uint<512> keep;
   ap_uint<6> id;
 
-std::cout <<__PRETTY_FUNCTION__ << "1\n";
   injectData(input, msg_key_strm, len_strm, key, keep, id);
-std::cout <<__PRETTY_FUNCTION__ << "2\n";
   ap_uint<384> res;
   internal::HMAC_SHA384_2in1(1, opad_buffer, first_digest, msg_key_strm,
                              len_strm, res);
-std::cout <<__PRETTY_FUNCTION__ << "3\n";
   first_digest = res;
   internal::HMAC_SHA384_2in1(2, opad_buffer, first_digest, msg_key_strm,
                              len_strm, res);
-std::cout <<__PRETTY_FUNCTION__ << "4\n";
   AXIS_DATA r;
   r.tdata = res;
   r.tlast = 1;
   r.tkeep = keep;
   r.tid = id;
   output.write(r);
-std::cout <<__PRETTY_FUNCTION__ << "5\n";
 }
 } // namespace security
 } // namespace xf
 
 } // namespace AXI
-
 void hmac(hls::stream<AXIS_DATA> &input, hls::stream<AXIS_DATA> &output) {
 #pragma HLS INTERFACE ap_ctrl_none port = return // removes handshake
 #pragma HLS interface axis register port = input
 #pragma HLS interface axis register port = output
 #pragma HLS AGGREGATE variable = input bit
 #pragma HLS AGGREGATE variable = output bit
-std::cout <<__PRETTY_FUNCTION__ << "\n";
   AXI::xf::security::HMAC_SHA384(input, output);
 }

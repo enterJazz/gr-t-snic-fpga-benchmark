@@ -45,17 +45,22 @@ void benchmark_kernel(kernel::Kernel target_kernel,
                       std::filesystem::path kernel_xlcbin_path,
                       size_t benchmark_execution_iterations) {
 
+  std::cout << __PRETTY_FUNCTION__ << " [1]\n";
   // access FPGA
   auto device = xrt::device(device_index);
+  std::cout << __PRETTY_FUNCTION__ << " [2]\n";
   auto uuid = device.load_xclbin(kernel_xlcbin_path);
+  std::cout << __PRETTY_FUNCTION__ << " [3]\n";
 
   auto krnl = xrt::kernel(device, uuid, kernel::kernelToString(target_kernel),
                           xrt::kernel::cu_access_mode::exclusive);
 
+  std::cout << __PRETTY_FUNCTION__ << " [4]\n";
   std::chrono::microseconds result;
 
   if (target_kernel == kernel::symmetric_attest ||
       target_kernel == kernel::asymmetric_attest) {
+  std::cout << __PRETTY_FUNCTION__ << " [5]\n";
     attest::benchmark_attest_kernel(result, device, krnl, target_kernel,
                                     benchmark_execution_iterations);
   } else if (target_kernel == kernel::symmetric_verify ||
